@@ -214,14 +214,7 @@ async function writeToOutput(name: string, blob: Blob): Promise<string> {
     return outputLabel || outputDirHandle.name
   }
 
-  // Auto-prompt once on Chromium if nothing chosen yet
-  if (supportsDirectoryPicker() && !outputLabel) {
-    const label = await chooseOutputFolder()
-    if (outputDirHandle && label) {
-      return writeToOutput(name, blob)
-    }
-  }
-
+  // No folder chosen → download locally (never upload). Optional folder via "Choose save folder".
   downloadBlob(blob, name)
   outputLabel = outputLabel || 'Downloads'
   return outputLabel
