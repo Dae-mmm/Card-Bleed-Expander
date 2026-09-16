@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import nodemailer from 'nodemailer'
 
-const TO_EMAIL = 'di.mammoli.design+feedback@gmail.com'
+const TO_EMAIL = 'd.mammoli.design+feedback@gmail.com'
 const MAX_MESSAGE = 5000
 const MAX_FIELD = 200
 
