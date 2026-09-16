@@ -504,7 +504,7 @@ export async function encodeCardExport(
     }
   }
   return {
-    blob: encodePngRgba(rgba.data, rgba.width, rgba.height, options.dpi || 300),
+    blob: await encodePngRgba(rgba.data, rgba.width, rgba.height, options.dpi || 300),
     extension: 'png',
   }
 }
@@ -525,7 +525,7 @@ export async function processPreviewDataUrl(
     const { ctx } = canvas2d(width, height)
     const img = new ImageData(new Uint8ClampedArray(data), width, height)
     ctx.putImageData(img, 0, 0)
-    const { canvas: outCanvas, ctx: outCtx } = canvas2d(w, h)
+    const { ctx: outCtx } = canvas2d(w, h)
     outCtx.imageSmoothingEnabled = true
     outCtx.imageSmoothingQuality = 'high'
     outCtx.drawImage(ctx.canvas as CanvasImageSource, 0, 0, w, h)
@@ -533,10 +533,9 @@ export async function processPreviewDataUrl(
     data = new Uint8Array(scaled.data)
     width = w
     height = h
-    void outCanvas
   }
 
-  const blob = encodePngRgba(data, width, height, options.dpi || 300)
+  const blob = await encodePngRgba(data, width, height, options.dpi || 300)
   return URL.createObjectURL(blob)
 }
 

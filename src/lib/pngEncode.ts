@@ -1,4 +1,4 @@
-/** Encode RGBA → PNG with optional pHYs DPI metadata (no dependencies). */
+/** Inject a pHYs (DPI) chunk into an existing PNG, or encode RGBA via canvas. */
 
 function crc32(buf: Uint8Array): number {
   let c = 0xffffffff
@@ -11,118 +11,111 @@ function crc32(buf: Uint8Array): number {
   return (c ^ 0xffffffff) >>> 0
 }
 
-function u32(n: number): Uint8Array {
+function u32be(n: number): Uint8Array {
   return new Uint8Array([(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255])
 }
 
-function chunk(type: string, data: Uint8Array): Uint8Array {
+function readU32be(buf: Uint8Array, offset: number): number {
+  return (
+    ((buf[offset] << 24) | (buf[offset + 1] << 16) | (buf[offset + 2] << 8) | buf[offset + 3]) >>> 0
+  )
+}
+
+function makeChunk(type: string, data: Uint8Array): Uint8Array {
   const typeBytes = new TextEncoder().encode(type)
-  const len = u32(data.length)
   const body = new Uint8Array(4 + data.length)
   body.set(typeBytes, 0)
   body.set(data, 4)
-  const crc = u32(crc32(body))
   const out = new Uint8Array(4 + body.length + 4)
-  out.set(len, 0)
+  out.set(u32be(data.length), 0)
   out.set(body, 4)
-  out.set(crc, 4 + body.length)
+  out.set(u32be(crc32(body)), 4 + body.length)
   return out
 }
 
-/** DEFLATE store blocks (no compression) — fine for card-sized images. */
-function deflateStore(data: Uint8Array): Uint8Array {
-  const blocks: Uint8Array[] = []
-  let offset = 0
-  while (offset < data.length) {
-    const size = Math.min(65535, data.length - offset)
-    const isLast = offset + size >= data.length
-    const block = new Uint8Array(5 + size)
-    block[0] = isLast ? 1 : 0
-    block[1] = size & 255
-    block[2] = (size >>> 8) & 255
-    block[3] = ~size & 255
-    block[4] = (~size >>> 8) & 255
-    block.set(data.subarray(offset, offset + size), 5)
-    blocks.push(block)
-    offset += size
+/** Insert/replace pHYs after IHDR so print tools see the intended DPI. */
+export function injectPngDpi(png: ArrayBuffer | Uint8Array, dpi: number): Uint8Array {
+  const src = png instanceof Uint8Array ? png : new Uint8Array(png)
+  if (src.length < 8 || src[0] !== 0x89) return src
+
+  const ppm = Math.round(dpi * (10000 / 254))
+  const physData = new Uint8Array(9)
+  physData.set(u32be(ppm), 0)
+  physData.set(u32be(ppm), 4)
+  physData[8] = 1
+  const physChunk = makeChunk('pHYs', physData)
+
+  // Find end of IHDR (always first chunk after signature)
+  let offset = 8
+  const len = readU32be(src, offset)
+  const ihdrEnd = offset + 12 + len // len + type + data + crc
+
+  // Skip/drop any existing pHYs while copying the rest
+  const parts: Uint8Array[] = [src.subarray(0, ihdrEnd), physChunk]
+  offset = ihdrEnd
+  while (offset + 12 <= src.length) {
+    const chunkLen = readU32be(src, offset)
+    const type = String.fromCharCode(src[offset + 4], src[offset + 5], src[offset + 6], src[offset + 7])
+    const chunkEnd = offset + 12 + chunkLen
+    if (type !== 'pHYs') {
+      parts.push(src.subarray(offset, chunkEnd))
+    }
+    offset = chunkEnd
+    if (type === 'IEND') break
   }
 
-  // zlib wrapper: CMF/FLG + deflate + adler32
-  const deflatedLen = blocks.reduce((n, b) => n + b.length, 0)
-  const out = new Uint8Array(2 + deflatedLen + 4)
-  out[0] = 0x78
-  out[1] = 0x01
-  let pos = 2
-  for (const b of blocks) {
-    out.set(b, pos)
-    pos += b.length
-  }
-  const adler = adler32(data)
-  out.set(u32(adler), pos)
-  return out
-}
-
-function adler32(data: Uint8Array): number {
-  let a = 1
-  let b = 0
-  for (let i = 0; i < data.length; i++) {
-    a = (a + data[i]) % 65521
-    b = (b + a) % 65521
-  }
-  return ((b << 16) | a) >>> 0
-}
-
-function filterNone(rgba: Uint8Array, width: number, height: number): Uint8Array {
-  const rowSize = width * 4
-  const out = new Uint8Array(height * (1 + rowSize))
-  for (let y = 0; y < height; y++) {
-    const dest = y * (1 + rowSize)
-    out[dest] = 0
-    out.set(rgba.subarray(y * rowSize, y * rowSize + rowSize), dest + 1)
+  const total = parts.reduce((n, p) => n + p.length, 0)
+  const out = new Uint8Array(total)
+  let pos = 0
+  for (const p of parts) {
+    out.set(p, pos)
+    pos += p.length
   }
   return out
 }
 
-export function encodePngRgba(
+function canvas2d(width: number, height: number): {
+  canvas: OffscreenCanvas | HTMLCanvasElement
+  ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
+} {
+  if (typeof OffscreenCanvas !== 'undefined') {
+    const canvas = new OffscreenCanvas(width, height)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('2D canvas unavailable')
+    return { canvas, ctx }
+  }
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('2D canvas unavailable')
+  return { canvas, ctx }
+}
+
+export async function encodePngRgba(
   rgba: Uint8Array,
   width: number,
   height: number,
   dpi = 300,
-): Blob {
-  const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])
+): Promise<Blob> {
+  const { canvas, ctx } = canvas2d(width, height)
+  const imageData = new ImageData(new Uint8ClampedArray(rgba), width, height)
+  ctx.putImageData(imageData, 0, 0)
 
-  const ihdr = new Uint8Array(13)
-  ihdr.set(u32(width), 0)
-  ihdr.set(u32(height), 4)
-  ihdr[8] = 8 // bit depth
-  ihdr[9] = 6 // RGBA
-  ihdr[10] = 0
-  ihdr[11] = 0
-  ihdr[12] = 0
-
-  const ppm = Math.round(dpi * (10000 / 254))
-  const phys = new Uint8Array(9)
-  phys.set(u32(ppm), 0)
-  phys.set(u32(ppm), 4)
-  phys[8] = 1 // meters
-
-  const filtered = filterNone(rgba, width, height)
-  const compressed = deflateStore(filtered)
-
-  const parts = [
-    signature,
-    chunk('IHDR', ihdr),
-    chunk('pHYs', phys),
-    chunk('IDAT', compressed),
-    chunk('IEND', new Uint8Array(0)),
-  ]
-
-  const total = parts.reduce((n, p) => n + p.length, 0)
-  const out = new Uint8Array(total)
-  let offset = 0
-  for (const p of parts) {
-    out.set(p, offset)
-    offset += p.length
+  let raw: ArrayBuffer
+  if ('convertToBlob' in canvas) {
+    const blob = await (canvas as OffscreenCanvas).convertToBlob({ type: 'image/png' })
+    raw = await blob.arrayBuffer()
+  } else {
+    const dataUrl = (canvas as HTMLCanvasElement).toDataURL('image/png')
+    const bin = atob(dataUrl.split(',')[1] ?? '')
+    const bytes = new Uint8Array(bin.length)
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+    raw = bytes.buffer
   }
-  return new Blob([out], { type: 'image/png' })
+
+  const withDpi = injectPngDpi(raw, dpi)
+  const copy = new Uint8Array(withDpi.byteLength)
+  copy.set(withDpi)
+  return new Blob([copy], { type: 'image/png' })
 }
