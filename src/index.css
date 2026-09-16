@@ -77,6 +77,13 @@ select {
   gap: 0.75rem;
 }
 
+.folder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
 .panel-header h2,
 .preview-toolbar h1 {
   margin: 0;
@@ -706,4 +713,83 @@ button:disabled {
   margin: 0;
   color: var(--ok);
   font-size: 0.88rem;
+}
+
+.import-dialog {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0;
+  background: var(--bg-panel);
+  color: var(--ink);
+  width: min(520px, calc(100vw - 2rem));
+  max-height: min(90vh, 760px);
+  overflow: auto;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.import-dialog::backdrop {
+  background: rgba(10, 12, 9, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.import-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 1.1rem;
+}
+
+.import-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.import-header h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.45rem;
+}
+
+.import-games {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.import-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+
+.import-field textarea {
+  font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ink);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  resize: vertical;
+  min-height: 12rem;
+  line-height: 1.4;
+}
+
+.import-progress {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
 }

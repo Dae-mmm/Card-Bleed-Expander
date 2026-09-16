@@ -6,7 +6,7 @@ const en: Dictionary = {
   folder: 'Folder',
   openFolder: 'Open…',
   openFolderHint:
-    'Open a folder with cards. Everything runs in your browser — files never leave your device.',
+    'Open a local folder, or import a list from Scryfall / Pokémon TCG / Yu-Gi-Oh.',
   prev: '← Prev',
   next: 'Next →',
   statusTodo: 'to do',
@@ -90,6 +90,21 @@ const en: Dictionary = {
   feedbackSent: 'Thanks — your feedback was sent.',
   feedbackClose: 'Close',
   feedbackError: 'Could not send feedback. Please try again later.',
+  importList: 'Import list…',
+  importTitle: 'Import card list',
+  importIntro:
+    'Paste a deck/list. Images are downloaded from public APIs into this browser session (not uploaded to our server). Respect each game’s terms and copyright for personal use.',
+  importListLabel: 'Card list',
+  importFormatHint: 'One card per line, e.g. “4 Lightning Bolt” or “3 Dark Magician”. Optional set: “1 Sol Ring (C21)”.',
+  importGameMtg: 'Magic',
+  importGamePokemon: 'Pokémon',
+  importGameYugioh: 'Yu-Gi-Oh!',
+  importStart: 'Import & download',
+  importWorking: 'Working…',
+  importPhaseResolve: 'Looking up',
+  importPhaseDownload: 'Downloading',
+  importNoneFound: 'No cards could be imported',
+  importError: 'Import failed',
 }
 
 export default en
