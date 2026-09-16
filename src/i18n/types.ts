@@ -1,0 +1,80 @@
+export type Locale = 'en' | 'it' | 'es' | 'fr' | 'de' | 'ru' | 'zh'
+
+export const LOCALES: { id: Locale; label: string }[] = [
+  { id: 'en', label: 'English' },
+  { id: 'it', label: 'Italiano' },
+  { id: 'es', label: 'Español' },
+  { id: 'fr', label: 'Français' },
+  { id: 'de', label: 'Deutsch' },
+  { id: 'ru', label: 'Русский' },
+  { id: 'zh', label: '中文' },
+]
+
+export const DEFAULT_LOCALE: Locale = 'en'
+
+export type TranslationKey =
+  | 'appTitle'
+  | 'settings'
+  | 'folder'
+  | 'openFolder'
+  | 'openFolderHint'
+  | 'prev'
+  | 'next'
+  | 'statusTodo'
+  | 'statusDone'
+  | 'showOriginal'
+  | 'selectCard'
+  | 'processing'
+  | 'previewAlt'
+  | 'originalAlt'
+  | 'borderType'
+  | 'borderBlack'
+  | 'borderWhite'
+  | 'borderNone'
+  | 'corners'
+  | 'cornersSame'
+  | 'cornersDifferent'
+  | 'cornerColors'
+  | 'cornerColorsHint'
+  | 'detectCorners'
+  | 'cornerTopLeft'
+  | 'cornerTopRight'
+  | 'cornerBottomLeft'
+  | 'cornerBottomRight'
+  | 'cornerColorAria'
+  | 'insetLabel'
+  | 'insetHint'
+  | 'cardSize'
+  | 'resizeToPrint'
+  | 'widthMm'
+  | 'heightMm'
+  | 'cardSizeHint'
+  | 'dpi'
+  | 'cornerRadius'
+  | 'colorSpace'
+  | 'colorSpaceHint'
+  | 'bleed'
+  | 'whiteThreshold'
+  | 'whiteThresholdHint'
+  | 'cropMarks'
+  | 'applyDefaultsFollowing'
+  | 'applyToAll'
+  | 'save'
+  | 'saveAndNext'
+  | 'saveAll'
+  | 'openOutput'
+  | 'setDefaultFollowing'
+  | 'setDefaultSize'
+  | 'setDefaultColorSpace'
+  | 'decrease'
+  | 'increase'
+  | 'applyDefaultShort'
+  | 'shortcuts'
+  | 'language'
+  | 'errorPreview'
+  | 'errorDetect'
+  | 'errorDetectFailed'
+  | 'errorSave'
+  | 'errorSaveAll'
+
+export type Dictionary = Record<TranslationKey, string>
