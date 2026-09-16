@@ -14,6 +14,13 @@ Perfect when your PNG/JPEG art looks great but isn’t ready for a print shop or
 
 **TL;DR:** From a folder of card art to trim-ready print files — size, bleed, corners, and crop marks, without opening Photoshop.
 
+---
+
+## Releases
+Latest: <a href="https://github.com/Dae-mmm/Card-Bleed-Expander/releases/tag/V1.1.0b"> V1.1.0b </a>
+
+---
+
 <p align="center">
   <img src="docs/ui-preview.png" alt="Card Bleed Expander preview with bleed and crop marks" width="900" />
 </p>
