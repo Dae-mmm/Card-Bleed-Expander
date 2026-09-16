@@ -12,7 +12,7 @@ Everything runs **in the browser**. Card images never leave your device — ther
 - Client-side image pipeline (Canvas)
 - Deployable on [Vercel](https://vercel.com) (static UI + `/api/feedback`)
 - [Vercel Analytics](https://vercel.com/docs/analytics)
-- Feedback form via [Resend](https://resend.com)
+- Feedback form via Gmail SMTP (Nodemailer)
 
 ## Requirements
 
@@ -25,7 +25,7 @@ npm install
 npm run dev
 ```
 
-For the feedback API locally, use `vercel dev` (needs `RESEND_API_KEY` in the environment).
+For the feedback API locally, use `vercel dev` (needs the Gmail env vars below).
 
 ## Build
 
@@ -43,10 +43,12 @@ Connect the repo and deploy. `vercel.json` rewrites SPA routes while leaving `/a
 
 | Name | Required | Purpose |
 |---|---|---|
-| `RESEND_API_KEY` | Yes (for feedback) | Resend API key |
-| `RESEND_FROM_EMAIL` | Optional | Verified sender, e.g. `Card Bleed <noreply@yourdomain.com>`. Defaults to `beth.t@example.com` for testing. |
+| `GMAIL_USER` | Yes (for feedback) | Gmail address used to send mail (SMTP login) |
+| `GMAIL_APP_PASSWORD` | Yes (for feedback) | [Google App Password](https://myaccount.google.com/apppasswords) for that account |
 
 Add them under **Project → Settings → Environment Variables**.
+
+Create the app password with 2FA enabled on the Google account. The feedback recipient stays server-side only (never shipped to the browser).
 
 ## Usage
 
