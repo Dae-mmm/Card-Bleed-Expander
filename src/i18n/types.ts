@@ -83,5 +83,17 @@ export type TranslationKey =
   | 'zoomOut'
   | 'zoomReset'
   | 'zoomHint'
+  | 'feedbackFab'
+  | 'feedbackTitle'
+  | 'feedbackIntro'
+  | 'feedbackName'
+  | 'feedbackContact'
+  | 'feedbackContactPlaceholder'
+  | 'feedbackMessage'
+  | 'feedbackSend'
+  | 'feedbackSending'
+  | 'feedbackSent'
+  | 'feedbackClose'
+  | 'feedbackError'
 
 export type Dictionary = Record<TranslationKey, string>

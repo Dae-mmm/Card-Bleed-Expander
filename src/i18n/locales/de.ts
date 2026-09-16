@@ -78,6 +78,18 @@ const de: Dictionary = {
   zoomOut: 'Verkleinern',
   zoomReset: 'Zoom zurücksetzen',
   zoomHint: 'Scrollen zoom · ziehen pan · Doppelklick reset',
+  feedbackFab: 'Feedbacks / issues report',
+  feedbackTitle: 'Feedback senden',
+  feedbackIntro: 'Melde einen Fehler oder schlage eine Verbesserung vor. Die Nachricht ist privat — keine E-Mail wird angezeigt.',
+  feedbackName: 'Name (optional)',
+  feedbackContact: 'Antwortkontakt (optional)',
+  feedbackContactPlaceholder: 'E-Mail oder Discord…',
+  feedbackMessage: 'Nachricht',
+  feedbackSend: 'Senden',
+  feedbackSending: 'Senden…',
+  feedbackSent: 'Danke — Feedback gesendet.',
+  feedbackClose: 'Schließen',
+  feedbackError: 'Senden fehlgeschlagen. Bitte später erneut versuchen.',
 }
 
 export default de
