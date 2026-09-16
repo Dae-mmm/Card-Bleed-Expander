@@ -5,7 +5,7 @@ const zh: Dictionary = {
   settings: '设置',
   folder: '文件夹',
   openFolder: '打开…',
-  openFolderHint: '打开包含待处理卡牌的文件夹。',
+  openFolderHint: '打开包含卡牌的文件夹。全部在浏览器本地处理——文件不会离开你的设备。',
   prev: '← 上一张',
   next: '下一张 →',
   statusTodo: '未完成',
@@ -54,6 +54,9 @@ const zh: Dictionary = {
   saveAndNext: '保存并下一张',
   saveAll: '全部保存',
   openOutput: '打开输出文件夹',
+  chooseOutput: '选择保存文件夹',
+  changeOutput: '更改保存文件夹',
+  outputFolderLabel: '保存到：{folder}',
   setDefaultFollowing: '将此值设为后续卡牌的默认值',
   setDefaultSize: '将尺寸与缩放设为后续卡牌的默认值',
   setDefaultColorSpace: '将 RGB/CMYK 设为后续卡牌的默认值',
@@ -68,6 +71,10 @@ const zh: Dictionary = {
   errorDetectFailed: '颜色检测失败',
   errorSave: '保存出错',
   errorSaveAll: '保存全部卡牌时出错',
+  zoomIn: '放大',
+  zoomOut: '缩小',
+  zoomReset: '重置缩放',
+  zoomHint: '滚轮缩放 · 拖动平移 · 双击重置',
 }
 
 export default zh

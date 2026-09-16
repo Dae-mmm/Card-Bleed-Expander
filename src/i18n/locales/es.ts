@@ -5,7 +5,8 @@ const es: Dictionary = {
   settings: 'Ajustes',
   folder: 'Carpeta',
   openFolder: 'Abrir…',
-  openFolderHint: 'Abre una carpeta con cartas para procesar.',
+  openFolderHint:
+    'Abre una carpeta con cartas. Todo se ejecuta en el navegador: los archivos no salen de tu dispositivo.',
   prev: '← Ant',
   next: 'Sig →',
   statusTodo: 'pendiente',
@@ -56,6 +57,9 @@ const es: Dictionary = {
   saveAndNext: 'Guardar y siguiente',
   saveAll: 'Guardar todo',
   openOutput: 'Abrir carpeta de salida',
+  chooseOutput: 'Elegir carpeta de guardado',
+  changeOutput: 'Cambiar carpeta de guardado',
+  outputFolderLabel: 'Guardando en: {folder}',
   setDefaultFollowing: 'Usar este valor como predeterminado para las cartas siguientes',
   setDefaultSize: 'Usar tamaño y redimensionado como predeterminado para las siguientes',
   setDefaultColorSpace: 'Usar RGB/CMYK como predeterminado para las siguientes',
@@ -70,6 +74,10 @@ const es: Dictionary = {
   errorDetectFailed: 'No se pudo detectar el color',
   errorSave: 'Error al guardar',
   errorSaveAll: 'Error al guardar todas las cartas',
+  zoomIn: 'Acercar',
+  zoomOut: 'Alejar',
+  zoomReset: 'Restablecer zoom',
+  zoomHint: 'Scroll zoom · arrastrar pan · doble clic reset',
 }
 
 export default es

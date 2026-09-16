@@ -3,14 +3,19 @@ import { Controls } from './components/Controls'
 import { FolderList } from './components/FolderList'
 import { Preview } from './components/Preview'
 import {
+  chooseOutputFolder,
+  detectCorners as sampleCornersForCard,
   fileName,
+  getOutputLabel,
+  hasOutputFolder,
   openFolder,
-  openPath,
   processPreview,
   readImageMeta,
   readOriginalDataUrl,
-  sampleCornerColors,
+  revokeUrl,
   saveImage,
+  supportsDirectoryPicker,
+  type LocalCard,
 } from './lib/ipc'
 import {
   DEFAULT_OPTIONS,
@@ -20,6 +25,7 @@ import {
   type ProcessOptions,
 } from './lib/types'
 import { useI18n } from './i18n'
+import { KofiWidget } from './components/KofiWidget'
 
 function cloneDefaults(base: ProcessOptions = DEFAULT_OPTIONS): ProcessOptions {
   return {
@@ -75,7 +81,7 @@ function applyDetectedColors(
 export default function App() {
   const { t } = useI18n()
   const [folderPath, setFolderPath] = useState<string | null>(null)
-  const [files, setFiles] = useState<string[]>([])
+  const [files, setFiles] = useState<LocalCard[]>([])
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [optionsByFile, setOptionsByFile] = useState<Record<string, ProcessOptions>>({})
   const [saved, setSaved] = useState<Set<string>>(new Set())
@@ -100,19 +106,19 @@ export default function App() {
 
   const options = useMemo(() => {
     if (!selectedFile) return DEFAULT_OPTIONS
-    return optionsByFile[selectedFile] ?? DEFAULT_OPTIONS
+    return optionsByFile[selectedFile.id] ?? DEFAULT_OPTIONS
   }, [optionsByFile, selectedFile])
 
   const setOptions = useCallback(
     (next: ProcessOptions) => {
       if (!selectedFile) return
-      setOptionsByFile((prev) => ({ ...prev, [selectedFile]: next }))
+      setOptionsByFile((prev) => ({ ...prev, [selectedFile.id]: next }))
     },
     [selectedFile],
   )
 
-  const detectCorners = useCallback(async (filePath: string, current: ProcessOptions) => {
-    const detected = await sampleCornerColors(filePath, {
+  const detectCorners = useCallback(async (card: LocalCard, current: ProcessOptions) => {
+    const detected = await sampleCornersForCard(card, {
       cornerRadiusMm: current.cornerRadiusMm,
       insetPx: current.insetPx,
       dpi: current.dpi,
@@ -121,8 +127,8 @@ export default function App() {
       targetHeightMm: current.targetHeightMm,
     })
     const next = applyDetectedColors(current, detected)
-    setOptionsByFile((prev) => ({ ...prev, [filePath]: next }))
-    autoSampled.current.add(filePath)
+    setOptionsByFile((prev) => ({ ...prev, [card.id]: next }))
+    autoSampled.current.add(card.id)
     return next
   }, [])
 
@@ -132,7 +138,7 @@ export default function App() {
     const defaults = cloneDefaults()
     const initial: Record<string, ProcessOptions> = {}
     for (const file of result.files) {
-      initial[file] = cloneDefaults(defaults)
+      initial[file.id] = cloneDefaults(defaults)
     }
     autoSampled.current = new Set()
     setSessionDefaults(defaults)
@@ -141,17 +147,28 @@ export default function App() {
     setOptionsByFile(initial)
     setSelectedIndex(0)
     setSaved(new Set())
-    setOutputDir(null)
-    setPreviewUrl(null)
-    setOriginalUrl(null)
+    setOutputDir(getOutputLabel())
+    setPreviewUrl((prev) => {
+      revokeUrl(prev)
+      return null
+    })
+    setOriginalUrl((prev) => {
+      revokeUrl(prev)
+      return null
+    })
     setError(null)
   }, [])
 
-  // Anteprima: non dipende dal sample (che può fallire senza bloccare l’UI)
   useEffect(() => {
     if (!selectedFile) {
-      setPreviewUrl(null)
-      setOriginalUrl(null)
+      setPreviewUrl((prev) => {
+        revokeUrl(prev)
+        return null
+      })
+      setOriginalUrl((prev) => {
+        revokeUrl(prev)
+        return null
+      })
       setMetaLabel(null)
       return
     }
@@ -167,38 +184,49 @@ export default function App() {
           readOriginalDataUrl(selectedFile),
           readImageMeta(selectedFile),
         ])
-        if (id !== requestId.current) return
-        setPreviewUrl(preview)
-        setOriginalUrl(original)
+        if (id !== requestId.current) {
+          revokeUrl(preview)
+          revokeUrl(original)
+          return
+        }
+        setPreviewUrl((prev) => {
+          revokeUrl(prev)
+          return preview
+        })
+        setOriginalUrl((prev) => {
+          revokeUrl(prev)
+          return original
+        })
         setMetaLabel(`${meta.width}×${meta.height} · ${meta.format}`)
       } catch (err) {
         if (id !== requestId.current) return
         const message = err instanceof Error ? err.message : t('errorPreview')
         setError(message)
-        setPreviewUrl(null)
+        setPreviewUrl((prev) => {
+          revokeUrl(prev)
+          return null
+        })
       } finally {
         if (id === requestId.current) setBusy(false)
       }
     })()
   }, [selectedFile, options, t])
 
-  // Auto-rileva colori spigolo (best-effort, non blocca l’anteprima)
   useEffect(() => {
     if (!selectedFile) return
-    if (autoSampled.current.has(selectedFile)) return
+    if (autoSampled.current.has(selectedFile.id)) return
 
-    const filePath = selectedFile
+    const card = selectedFile
     let cancelled = false
 
     ;(async () => {
-      const current = optionsByFileRef.current[filePath] ?? cloneDefaults(sessionDefaultsRef.current)
+      const current = optionsByFileRef.current[card.id] ?? cloneDefaults(sessionDefaultsRef.current)
       try {
-        await detectCorners(filePath, current)
+        await detectCorners(card, current)
       } catch (err) {
         if (cancelled) return
-        autoSampled.current.add(filePath)
-        const message =
-          err instanceof Error ? err.message : t('errorDetectFailed')
+        autoSampled.current.add(card.id)
+        const message = err instanceof Error ? err.message : t('errorDetectFailed')
         setError((prev) => prev ?? message)
       }
     })()
@@ -219,8 +247,8 @@ export default function App() {
         const next: Record<string, ProcessOptions> = { ...prev }
         for (let i = selectedIndex + 1; i < files.length; i++) {
           const file = files[i]
-          const current = prev[file] ?? cloneDefaults(sessionDefaultsRef.current)
-          next[file] = {
+          const current = prev[file.id] ?? cloneDefaults(sessionDefaultsRef.current)
+          next[file.id] = {
             ...current,
             ...patch,
             cornerColors: { ...current.cornerColors },
@@ -242,8 +270,8 @@ export default function App() {
     setOptionsByFile((prev) => {
       const next: Record<string, ProcessOptions> = {}
       for (const file of files) {
-        const current = prev[file] ?? cloneDefaults(sessionDefaultsRef.current)
-        next[file] = {
+        const current = prev[file.id] ?? cloneDefaults(sessionDefaultsRef.current)
+        next[file.id] = {
           ...current,
           ...patch,
           showCropMarks: options.showCropMarks,
@@ -274,9 +302,9 @@ export default function App() {
       setBusy(true)
       setError(null)
       try {
-        const result = await saveImage(selectedFile, options, outputDir ?? undefined)
-        setOutputDir(result.outputDir)
-        setSaved((prev) => new Set(prev).add(selectedFile))
+        const result = await saveImage(selectedFile, options)
+        setOutputDir(result.outputLabel)
+        setSaved((prev) => new Set(prev).add(selectedFile.id))
         if (goNext && selectedIndex < files.length - 1) {
           setSelectedIndex((i) => i + 1)
         }
@@ -286,7 +314,7 @@ export default function App() {
         setBusy(false)
       }
     },
-    [selectedFile, options, outputDir, selectedIndex, files.length, t],
+    [selectedFile, options, selectedIndex, files.length, t],
   )
 
   const handleSaveAll = useCallback(async () => {
@@ -294,18 +322,19 @@ export default function App() {
     setBusy(true)
     setError(null)
     try {
-      let lastOutputDir = outputDir
       const newlySaved = new Set<string>()
+      let lastLabel = outputDir
       for (const file of files) {
-        const fileOptions = optionsByFileRef.current[file] ?? cloneDefaults(sessionDefaultsRef.current)
-        const result = await saveImage(file, fileOptions, lastOutputDir ?? undefined)
-        lastOutputDir = result.outputDir
-        newlySaved.add(file)
+        const fileOptions =
+          optionsByFileRef.current[file.id] ?? cloneDefaults(sessionDefaultsRef.current)
+        const result = await saveImage(file, fileOptions)
+        lastLabel = result.outputLabel
+        newlySaved.add(file.id)
       }
-      if (lastOutputDir) setOutputDir(lastOutputDir)
+      if (lastLabel) setOutputDir(lastLabel)
       setSaved((prev) => {
         const next = new Set(prev)
-        for (const file of newlySaved) next.add(file)
+        for (const id of newlySaved) next.add(id)
         return next
       })
     } catch (err) {
@@ -315,6 +344,11 @@ export default function App() {
     }
   }, [files, outputDir, t])
 
+  const handleChooseOutput = useCallback(async () => {
+    const label = await chooseOutputFolder()
+    if (label) setOutputDir(label)
+  }, [])
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const el = event.target as HTMLElement | null
@@ -323,7 +357,6 @@ export default function App() {
 
       const mod = event.metaKey || event.ctrlKey
 
-      // Shift + ←/→ : taglio interno
       if (event.shiftKey && !mod && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
         if (!selectedFile) return
         event.preventDefault()
@@ -335,7 +368,6 @@ export default function App() {
         return
       }
 
-      // Shift+Invio : salva tutto
       if (event.shiftKey && !mod && event.key === 'Enter') {
         if (files.length === 0) return
         event.preventDefault()
@@ -345,7 +377,6 @@ export default function App() {
 
       if (files.length === 0) return
 
-      // 1 = un colore, 2 = quattro colori
       if (event.key === '1' && !mod && !event.shiftKey && !event.altKey) {
         event.preventDefault()
         setOptions({
@@ -366,7 +397,6 @@ export default function App() {
         return
       }
 
-      // Shift+C : campiona colori
       if (event.shiftKey && !mod && (event.key === 'C' || event.key === 'c')) {
         event.preventDefault()
         void handleDetectCorners()
@@ -404,15 +434,19 @@ export default function App() {
     setOptions,
   ])
 
+  const fileIds = useMemo(() => files.map((f) => f.id), [files])
+
   return (
     <div className="app-shell">
+      <KofiWidget />
       <FolderList
         folderPath={folderPath}
-        files={files}
+        files={fileIds}
+        fileLabels={files.map((f) => f.name)}
         selectedIndex={selectedIndex}
         saved={saved}
         onSelect={setSelectedIndex}
-        onOpenFolder={handleOpenFolder}
+        onOpenFolder={() => void handleOpenFolder()}
       />
       <Preview
         previewUrl={previewUrl}
@@ -420,7 +454,7 @@ export default function App() {
         showOriginal={showOriginal}
         onToggleOriginal={setShowOriginal}
         busy={busy}
-        fileLabel={selectedFile ? fileName(selectedFile) : null}
+        fileLabel={selectedFile ? fileName(selectedFile.name) : null}
         metaLabel={metaLabel}
         error={error}
       />
@@ -433,13 +467,13 @@ export default function App() {
         onSave={() => void handleSave(false)}
         onSaveAndNext={() => void handleSave(true)}
         onSaveAll={() => void handleSaveAll()}
-        onOpenOutput={() => {
-          if (outputDir) void openPath(outputDir)
-        }}
+        onOpenOutput={() => void handleChooseOutput()}
         busy={busy}
         hasSelection={Boolean(selectedFile)}
         hasFiles={files.length > 0}
-        hasOutput={Boolean(outputDir)}
+        hasOutput={hasOutputFolder() || Boolean(outputDir)}
+        outputLabel={outputDir}
+        canPickOutputFolder={supportsDirectoryPicker()}
         hasFollowing={selectedIndex < files.length - 1}
       />
     </div>

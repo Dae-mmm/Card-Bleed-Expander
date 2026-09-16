@@ -5,7 +5,8 @@ const de: Dictionary = {
   settings: 'Einstellungen',
   folder: 'Ordner',
   openFolder: 'Öffnen…',
-  openFolderHint: 'Öffne einen Ordner mit zu verarbeitenden Karten.',
+  openFolderHint:
+    'Öffne einen Ordner mit Karten. Alles läuft im Browser — Dateien verlassen dein Gerät nicht.',
   prev: '← Zurück',
   next: 'Weiter →',
   statusTodo: 'offen',
@@ -56,6 +57,9 @@ const de: Dictionary = {
   saveAndNext: 'Speichern & weiter',
   saveAll: 'Alles speichern',
   openOutput: 'Ausgabeordner öffnen',
+  chooseOutput: 'Speicherordner wählen',
+  changeOutput: 'Speicherordner ändern',
+  outputFolderLabel: 'Speichern in: {folder}',
   setDefaultFollowing: 'Diesen Wert als Standard für folgende Karten setzen',
   setDefaultSize: 'Maß und Skalierung als Standard für folgende setzen',
   setDefaultColorSpace: 'RGB/CMYK als Standard für folgende setzen',
@@ -70,6 +74,10 @@ const de: Dictionary = {
   errorDetectFailed: 'Farberkennung fehlgeschlagen',
   errorSave: 'Fehler beim Speichern',
   errorSaveAll: 'Fehler beim Speichern aller Karten',
+  zoomIn: 'Vergrößern',
+  zoomOut: 'Verkleinern',
+  zoomReset: 'Zoom zurücksetzen',
+  zoomHint: 'Scrollen zoom · ziehen pan · Doppelklick reset',
 }
 
 export default de

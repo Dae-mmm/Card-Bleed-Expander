@@ -63,6 +63,9 @@ export type TranslationKey =
   | 'saveAndNext'
   | 'saveAll'
   | 'openOutput'
+  | 'chooseOutput'
+  | 'changeOutput'
+  | 'outputFolderLabel'
   | 'setDefaultFollowing'
   | 'setDefaultSize'
   | 'setDefaultColorSpace'
@@ -76,5 +79,9 @@ export type TranslationKey =
   | 'errorDetectFailed'
   | 'errorSave'
   | 'errorSaveAll'
+  | 'zoomIn'
+  | 'zoomOut'
+  | 'zoomReset'
+  | 'zoomHint'
 
 export type Dictionary = Record<TranslationKey, string>
