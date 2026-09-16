@@ -5,3 +5,7 @@ dist
 output
 tmp-test
 .vercel
+.env
+.env.local
+.env.*.local
+

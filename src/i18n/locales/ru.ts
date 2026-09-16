@@ -78,6 +78,18 @@ const ru: Dictionary = {
   zoomOut: 'Уменьшить',
   zoomReset: 'Сбросить масштаб',
   zoomHint: 'Колесо zoom · перетаскивание pan · двойной клик reset',
+  feedbackFab: 'Feedbacks / issues report',
+  feedbackTitle: 'Отправить отзыв',
+  feedbackIntro: 'Сообщите об ошибке или предложите улучшение. Сообщение приватное — адрес почты на странице не показывается.',
+  feedbackName: 'Имя (необязательно)',
+  feedbackContact: 'Контакт для ответа (необязательно)',
+  feedbackContactPlaceholder: 'Email или Discord…',
+  feedbackMessage: 'Сообщение',
+  feedbackSend: 'Отправить',
+  feedbackSending: 'Отправка…',
+  feedbackSent: 'Спасибо — отзыв отправлен.',
+  feedbackClose: 'Закрыть',
+  feedbackError: 'Не удалось отправить. Попробуйте позже.',
 }
 
 export default ru

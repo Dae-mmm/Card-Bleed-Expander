@@ -75,6 +75,18 @@ const zh: Dictionary = {
   zoomOut: '缩小',
   zoomReset: '重置缩放',
   zoomHint: '滚轮缩放 · 拖动平移 · 双击重置',
+  feedbackFab: 'Feedbacks / issues report',
+  feedbackTitle: '发送反馈',
+  feedbackIntro: '报告问题或提出建议。消息是私密的——页面上不会显示邮箱地址。',
+  feedbackName: '姓名（可选）',
+  feedbackContact: '回复联系方式（可选）',
+  feedbackContactPlaceholder: '邮箱或 Discord…',
+  feedbackMessage: '留言',
+  feedbackSend: '发送',
+  feedbackSending: '发送中…',
+  feedbackSent: '谢谢——反馈已发送。',
+  feedbackClose: '关闭',
+  feedbackError: '发送失败，请稍后再试。',
 }
 
 export default zh

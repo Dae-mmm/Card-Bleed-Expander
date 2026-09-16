@@ -2,7 +2,7 @@
 
 Web app to expand playing-card edges for print bleed, rounded corners, and crop marks.
 
-Everything runs **in the browser**. Card images never leave your device — there is no upload and no server-side storage.
+Everything runs **in the browser**. Card images never leave your device — there is no upload and no server-side storage for card files.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/daemmm)
 
@@ -10,7 +10,9 @@ Everything runs **in the browser**. Card images never leave your device — ther
 
 - React + Vite
 - Client-side image pipeline (Canvas)
-- Deployable as a static site on [Vercel](https://vercel.com)
+- Deployable on [Vercel](https://vercel.com) (static UI + `/api/feedback`)
+- [Vercel Analytics](https://vercel.com/docs/analytics)
+- Feedback form via [Resend](https://resend.com)
 
 ## Requirements
 
@@ -23,6 +25,8 @@ npm install
 npm run dev
 ```
 
+For the feedback API locally, use `vercel dev` (needs `RESEND_API_KEY` in the environment).
+
 ## Build
 
 ```bash
@@ -33,7 +37,16 @@ Output goes to `dist/` (static files). Preview locally with `npm run preview`.
 
 ## Deploy on Vercel
 
-Connect the repo and deploy. `vercel.json` is already set for SPA routing. No serverless functions or storage required.
+Connect the repo and deploy. `vercel.json` rewrites SPA routes while leaving `/api/*` alone.
+
+### Environment variables
+
+| Name | Required | Purpose |
+|---|---|---|
+| `RESEND_API_KEY` | Yes (for feedback) | Resend API key |
+| `RESEND_FROM_EMAIL` | Optional | Verified sender, e.g. `Card Bleed <noreply@yourdomain.com>`. Defaults to `beth.t@example.com` for testing. |
+
+Add them under **Project → Settings → Environment Variables**.
 
 ## Usage
 
@@ -42,7 +55,12 @@ Connect the repo and deploy. `vercel.json` is already set for SPA routing. No se
 3. Pan/zoom the preview (scroll, drag, or `+` / `−`; double-click to reset)
 4. Optionally **Choose save folder** (Chromium) — otherwise files download to your Downloads folder
 5. **Save** / **Save & next** / **Save all**
+6. Use **Feedbacks / issues report** (bottom center) to send private feedback
 
 ## Privacy
 
-Processing is 100% local. The only network request from the app UI is the optional Ko-fi support widget script.
+Card processing is 100% local. Network requests from the UI:
+
+- optional Ko-fi widget script
+- Vercel Analytics
+- `/api/feedback` when the user submits the feedback form (message only; recipient address stays on the server)

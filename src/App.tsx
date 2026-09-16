@@ -26,6 +26,7 @@ import {
 } from './lib/types'
 import { useI18n } from './i18n'
 import { KofiWidget } from './components/KofiWidget'
+import { FeedbackWidget } from './components/FeedbackWidget'
 
 function cloneDefaults(base: ProcessOptions = DEFAULT_OPTIONS): ProcessOptions {
   return {
@@ -439,6 +440,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <KofiWidget />
+      <FeedbackWidget />
       <FolderList
         folderPath={folderPath}
         files={fileIds}
