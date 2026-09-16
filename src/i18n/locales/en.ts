@@ -5,7 +5,8 @@ const en: Dictionary = {
   settings: 'Settings',
   folder: 'Folder',
   openFolder: 'Open…',
-  openFolderHint: 'Open a folder with cards to process.',
+  openFolderHint:
+    'Open a folder with cards. Everything runs in your browser — files never leave your device.',
   prev: '← Prev',
   next: 'Next →',
   statusTodo: 'to do',
@@ -43,7 +44,8 @@ const en: Dictionary = {
   dpi: 'DPI',
   cornerRadius: 'Corner radius (mm)',
   colorSpace: 'Color space',
-  colorSpaceHint: 'RGB saves PNG. CMYK converts for print and saves TIFF (preview stays RGB).',
+  colorSpaceHint:
+    'RGB saves PNG. CMYK converts for print and saves TIFF (soft conversion; preview stays RGB).',
   bleed: 'Bleed (mm)',
   whiteThreshold: 'JPEG white threshold',
   whiteThresholdHint:
@@ -55,6 +57,9 @@ const en: Dictionary = {
   saveAndNext: 'Save & next',
   saveAll: 'Save all',
   openOutput: 'Open output folder',
+  chooseOutput: 'Choose save folder',
+  changeOutput: 'Change save folder',
+  outputFolderLabel: 'Saving to: {folder}',
   setDefaultFollowing: 'Set this value as default for following cards',
   setDefaultSize: 'Set size and resize as default for following cards',
   setDefaultColorSpace: 'Set RGB/CMYK as default for following cards',

@@ -1,31 +1,8 @@
-export type BorderType = 'black' | 'white' | 'none'
-export type ColorSpace = 'rgb' | 'cmyk'
+import type { CornerColors, ProcessOptions } from './types'
+import { encodePngRgba } from './pngEncode'
+import { encodeCmykTiff } from './cmykTiff'
 
 export type CornerId = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
-
-export interface CornerColors {
-  topLeft: string
-  topRight: string
-  bottomLeft: string
-  bottomRight: string
-}
-
-export interface ProcessOptions {
-  borderType: BorderType
-  sameCorners: boolean
-  cornerColors: CornerColors
-  cornerRadiusMm: number
-  insetPx: number
-  resizeToTarget: boolean
-  targetWidthMm: number
-  targetHeightMm: number
-  bleedMm: number
-  dpi: number
-  colorSpace: ColorSpace
-  whiteThreshold: number
-  showCropMarks: boolean
-  cropMarkLengthMm?: number
-}
 
 export interface ImageMeta {
   width: number
@@ -35,6 +12,7 @@ export interface ImageMeta {
 }
 
 type Rgb = { r: number; g: number; b: number }
+type RgbaBuffer = { data: Uint8Array; width: number; height: number }
 
 function mmToPx(mm: number, dpi: number): number {
   return Math.max(0, Math.round((mm / 25.4) * dpi))
@@ -61,7 +39,6 @@ function isNearWhite(r: number, g: number, b: number, threshold: number): boolea
   return r >= threshold && g >= threshold && b >= threshold
 }
 
-/** Pixel fuori dalla silhouette a rettangolo stondato (nei soli angoli). */
 function cornerOutsideSilhouette(
   x: number,
   y: number,
@@ -126,12 +103,9 @@ function resolveCornerFill(corner: CornerId, options: ProcessOptions): Rgb {
   return parseHexColor(hex)
 }
 
-/** Colore ad alto contrasto rispetto al riempimento angolo (per i crocini). */
 function oppositeRgb(color: Rgb): Rgb {
   const luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b
-  return luminance < 128
-    ? { r: 255, g: 255, b: 255 }
-    : { r: 0, g: 0, b: 0 }
+  return luminance < 128 ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 }
 }
 
 function cropMarkInk(corner: CornerId, options: ProcessOptions): Rgb {
@@ -145,7 +119,6 @@ function rgbToHex({ r, g, b }: Rgb): string {
   return `#${h(r)}${h(g)}${h(b)}`
 }
 
-/** Punto di campionamento: 3px in diagonale dal bordo dello spigolo verso il centro. */
 function cornerSamplePoint(
   corner: CornerId,
   width: number,
@@ -161,7 +134,6 @@ function cornerSamplePoint(
     y: Math.max(0, Math.min(height - 1, Math.round(y))),
   })
 
-  // Se il raggio è troppo piccolo, campiona 3px in diagonale dall'angolo del bounding box.
   if (r <= d) {
     switch (corner) {
       case 'topLeft':
@@ -175,7 +147,6 @@ function cornerSamplePoint(
     }
   }
 
-  // Dal bordo arrotondato (arco) indietro di d px verso il centro carta, lungo la diagonale.
   const along = r - d
   switch (corner) {
     case 'topLeft':
@@ -189,60 +160,95 @@ function cornerSamplePoint(
   }
 }
 
-function readPixel(data: Buffer, width: number, x: number, y: number): Rgb {
+function readPixel(data: Uint8Array, width: number, x: number, y: number): Rgb {
   const i = (y * width + x) * 4
   return { r: data[i], g: data[i + 1], b: data[i + 2] }
 }
 
-export async function sampleCornerColors(
-  filePath: string,
-  options: Pick<
-    ProcessOptions,
-    | 'cornerRadiusMm'
-    | 'insetPx'
-    | 'dpi'
-    | 'resizeToTarget'
-    | 'targetWidthMm'
-    | 'targetHeightMm'
-  >,
-): Promise<CornerColors> {
-  const full = options as ProcessOptions
-  const insetPx = Math.max(0, Math.round(full.insetPx || 0))
-  const radiusPx = mmToPx(full.cornerRadiusMm, full.dpi)
-  const overscan = full.resizeToTarget !== false ? insetPx : 0
-  const loaded = await loadCardRgba(filePath, full, overscan)
-
-  const radiusBeforeCrop =
-    full.resizeToTarget !== false && insetPx > 0 ? radiusPx + insetPx : radiusPx
-
-  const cropped = roundedInsetCrop(
-    loaded.data,
-    loaded.width,
-    loaded.height,
-    insetPx,
-    radiusBeforeCrop,
-  )
-
-  const corners: CornerId[] = ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']
-  const result = {} as CornerColors
-  for (const corner of corners) {
-    const pt = cornerSamplePoint(corner, cropped.width, cropped.height, cropped.radius)
-    result[corner] = rgbToHex(readPixel(cropped.data, cropped.width, pt.x, pt.y))
-  }
-  return result
+function formatFromName(name: string): string {
+  const ext = name.split('.').pop()?.toLowerCase()
+  if (ext === 'jpg' || ext === 'jpeg') return 'jpeg'
+  if (ext === 'png' || ext === 'webp') return ext
+  return ext || 'unknown'
 }
 
-/**
- * Taglia n px verso l’interno con maschera a rettangolo stondato.
- * I pixel fuori dalla maschera restano trasparenti (poi fixCorners li riempie).
- */
+async function decodeBitmap(source: Blob): Promise<ImageBitmap> {
+  return createImageBitmap(source)
+}
+
+function canvas2d(width: number, height: number): {
+  canvas: OffscreenCanvas | HTMLCanvasElement
+  ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
+} {
+  if (typeof OffscreenCanvas !== 'undefined') {
+    const canvas = new OffscreenCanvas(width, height)
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    if (!ctx) throw new Error('2D canvas unavailable')
+    return { canvas, ctx }
+  }
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (!ctx) throw new Error('2D canvas unavailable')
+  return { canvas, ctx }
+}
+
+function resolveTargetSize(
+  srcW: number,
+  srcH: number,
+  options: ProcessOptions,
+): { width: number; height: number } {
+  const targetW = mmToPx(options.targetWidthMm ?? 63, options.dpi)
+  const targetH = mmToPx(options.targetHeightMm ?? 88, options.dpi)
+
+  const targetPortrait = targetW <= targetH
+  const sourceLandscape = srcW > srcH
+  if (targetPortrait && sourceLandscape) {
+    return { width: targetH, height: targetW }
+  }
+  if (!targetPortrait && srcH > srcW) {
+    return { width: targetH, height: targetW }
+  }
+  return { width: targetW, height: targetH }
+}
+
+async function loadCardRgba(
+  source: Blob,
+  options: ProcessOptions,
+  overscanPx = 0,
+): Promise<RgbaBuffer> {
+  const bitmap = await decodeBitmap(source)
+  try {
+    let outW = bitmap.width
+    let outH = bitmap.height
+
+    if (options.resizeToTarget !== false) {
+      const target = resolveTargetSize(bitmap.width, bitmap.height, options)
+      const pad = Math.max(0, overscanPx)
+      outW = target.width + pad * 2
+      outH = target.height + pad * 2
+    }
+
+    const { ctx } = canvas2d(outW, outH)
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.clearRect(0, 0, outW, outH)
+    ctx.drawImage(bitmap, 0, 0, outW, outH)
+    const imageData = ctx.getImageData(0, 0, outW, outH)
+    return { data: new Uint8Array(imageData.data), width: outW, height: outH }
+  } finally {
+    bitmap.close()
+  }
+}
+
 function roundedInsetCrop(
-  src: Buffer,
+  src: Uint8Array,
   width: number,
   height: number,
   inset: number,
   radius: number,
-): { data: Buffer; width: number; height: number; radius: number } {
+): { data: Uint8Array; width: number; height: number; radius: number } {
   const maxInset = Math.floor(Math.min(width, height) / 2) - 1
   const n = Math.max(0, Math.min(inset, Math.max(0, maxInset)))
   if (n <= 0) {
@@ -252,7 +258,7 @@ function roundedInsetCrop(
   const outW = width - n * 2
   const outH = height - n * 2
   const outR = Math.max(0, radius - n)
-  const out = Buffer.alloc(outW * outH * 4)
+  const out = new Uint8Array(outW * outH * 4)
 
   for (let y = 0; y < outH; y++) {
     for (let x = 0; x < outW; x++) {
@@ -276,7 +282,7 @@ function roundedInsetCrop(
 }
 
 function fixCorners(
-  data: Buffer,
+  data: Uint8Array,
   width: number,
   height: number,
   options: ProcessOptions,
@@ -313,14 +319,14 @@ function fixCorners(
 }
 
 function edgeExtend(
-  src: Buffer,
+  src: Uint8Array,
   width: number,
   height: number,
   bleed: number,
-): { data: Buffer; width: number; height: number } {
+): RgbaBuffer {
   const outW = width + bleed * 2
   const outH = height + bleed * 2
-  const out = Buffer.alloc(outW * outH * 4)
+  const out = new Uint8Array(outW * outH * 4)
 
   for (let y = 0; y < outH; y++) {
     const sy = Math.min(height - 1, Math.max(0, y - bleed))
@@ -339,7 +345,7 @@ function edgeExtend(
 }
 
 function drawCropMarks(
-  data: Buffer,
+  data: Uint8Array,
   width: number,
   height: number,
   bleed: number,
@@ -402,86 +408,29 @@ function drawCropMarks(
   drawV(right - thickness + 1, bottom + 1, len, 1)
 }
 
-export async function readImageMeta(filePath: string): Promise<ImageMeta> {
-  const sharp = (await import('sharp')).default
-  const image = sharp(filePath)
-  const meta = await image.metadata()
-  return {
-    width: meta.width ?? 0,
-    height: meta.height ?? 0,
-    hasAlpha: Boolean(meta.hasAlpha),
-    format: meta.format ?? 'unknown',
+export async function readImageMeta(source: Blob, fileName = 'card.png'): Promise<ImageMeta> {
+  const bitmap = await decodeBitmap(source)
+  try {
+    return {
+      width: bitmap.width,
+      height: bitmap.height,
+      hasAlpha: true,
+      format: formatFromName(fileName),
+    }
+  } finally {
+    bitmap.close()
   }
 }
 
-/**
- * Dimensioni trim finali (dopo eventuale taglio interno).
- * Se l’originale è landscape e il target è portrait, scambia i lati.
- */
-async function resolveTargetSize(
-  filePath: string,
+export async function processCardRgba(
+  source: Blob,
   options: ProcessOptions,
-): Promise<{ width: number; height: number }> {
-  const targetW = mmToPx(options.targetWidthMm ?? 63, options.dpi)
-  const targetH = mmToPx(options.targetHeightMm ?? 88, options.dpi)
-  const sharp = (await import('sharp')).default
-  const meta = await sharp(filePath).metadata()
-  const srcW = meta.width ?? targetW
-  const srcH = meta.height ?? targetH
-
-  const targetPortrait = targetW <= targetH
-  const sourceLandscape = srcW > srcH
-  if (targetPortrait && sourceLandscape) {
-    return { width: targetH, height: targetW }
-  }
-  if (!targetPortrait && srcH > srcW) {
-    return { width: targetH, height: targetW }
-  }
-  return { width: targetW, height: targetH }
-}
-
-/**
- * Carica la carta in RGBA.
- * Con resize attivo: porta l’immagine alla misura di stampa.
- * Se serve un taglio interno, ridimensiona più grande di 2×inset così che
- * DOPO il taglio la carta sia esattamente la misura scelta.
- */
-async function loadCardRgba(
-  filePath: string,
-  options: ProcessOptions,
-  overscanPx = 0,
-): Promise<{ data: Buffer; width: number; height: number }> {
-  const sharp = (await import('sharp')).default
-  let pipeline = sharp(filePath).ensureAlpha()
-
-  if (options.resizeToTarget !== false) {
-    const target = await resolveTargetSize(filePath, options)
-    const pad = Math.max(0, overscanPx)
-    pipeline = pipeline.resize(target.width + pad * 2, target.height + pad * 2, {
-      fit: 'fill',
-      kernel: 'lanczos3',
-    })
-  }
-
-  const { data, info } = await pipeline.raw().toBuffer({ resolveWithObject: true })
-  return { data: Buffer.from(data), width: info.width, height: info.height }
-}
-
-export async function processCardImage(
-  filePath: string,
-  options: ProcessOptions,
-): Promise<Buffer> {
-  const sharp = (await import('sharp')).default
+): Promise<RgbaBuffer> {
   const insetPx = Math.max(0, Math.round(options.insetPx || 0))
   const radiusPx = mmToPx(options.cornerRadiusMm, options.dpi)
-
-  // Con resize: overscan = inset, così dopo il taglio resta la misura scelta.
-  // Senza resize: taglio sull’originale (la misura finale sarà minore).
   const overscan = options.resizeToTarget !== false ? insetPx : 0
-  const loaded = await loadCardRgba(filePath, options, overscan)
+  const loaded = await loadCardRgba(source, options, overscan)
 
-  // Raggio sulla superficie pre-taglio: se abbiamo fatto overscan, il raggio
-  // “esterno” è R+inset così dopo il crop resta R sulla misura finale.
   const radiusBeforeCrop =
     options.resizeToTarget !== false && insetPx > 0 ? radiusPx + insetPx : radiusPx
 
@@ -503,59 +452,116 @@ export async function processCardImage(
     drawCropMarks(extended.data, extended.width, extended.height, bleed, markLen, options)
   }
 
-  return sharp(extended.data, {
-    raw: {
-      width: extended.width,
-      height: extended.height,
-      channels: 4,
-    },
-  })
-    .withMetadata({ density: options.dpi })
-    .png()
-    .toBuffer()
+  return extended
 }
 
-/** Converte l’export RGB in CMYK TIFF se richiesto; altrimenti PNG. */
-export async function encodeCardExport(
-  rgbPng: Buffer,
-  options: ProcessOptions,
-): Promise<{ buffer: Buffer; extension: 'png' | 'tif' }> {
-  if (options.colorSpace !== 'cmyk') {
-    return { buffer: rgbPng, extension: 'png' }
+export async function sampleCornerColors(
+  source: Blob,
+  options: Pick<
+    ProcessOptions,
+    | 'cornerRadiusMm'
+    | 'insetPx'
+    | 'dpi'
+    | 'resizeToTarget'
+    | 'targetWidthMm'
+    | 'targetHeightMm'
+  >,
+): Promise<CornerColors> {
+  const full = options as ProcessOptions
+  const insetPx = Math.max(0, Math.round(full.insetPx || 0))
+  const radiusPx = mmToPx(full.cornerRadiusMm, full.dpi)
+  const overscan = full.resizeToTarget !== false ? insetPx : 0
+  const loaded = await loadCardRgba(source, full, overscan)
+
+  const radiusBeforeCrop =
+    full.resizeToTarget !== false && insetPx > 0 ? radiusPx + insetPx : radiusPx
+
+  const cropped = roundedInsetCrop(
+    loaded.data,
+    loaded.width,
+    loaded.height,
+    insetPx,
+    radiusBeforeCrop,
+  )
+
+  const corners: CornerId[] = ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']
+  const result = {} as CornerColors
+  for (const corner of corners) {
+    const pt = cornerSamplePoint(corner, cropped.width, cropped.height, cropped.radius)
+    result[corner] = rgbToHex(readPixel(cropped.data, cropped.width, pt.x, pt.y))
   }
+  return result
+}
 
-  const sharp = (await import('sharp')).default
-  // Non usare withMetadata qui: allega un profilo sRGB e annulla il CMYK.
-  const dpi = options.dpi || 300
-  const buffer = await sharp(rgbPng)
-    .removeAlpha()
-    .toColorspace('cmyk')
-    .tiff({
-      compression: 'lzw',
-      xres: dpi / 25.4,
-      yres: dpi / 25.4,
-      resolutionUnit: 'inch',
-    })
-    .toBuffer()
-
-  return { buffer, extension: 'tif' }
+export async function encodeCardExport(
+  rgba: RgbaBuffer,
+  options: ProcessOptions,
+): Promise<{ blob: Blob; extension: 'png' | 'tif' }> {
+  if (options.colorSpace === 'cmyk') {
+    return {
+      blob: encodeCmykTiff(rgba.data, rgba.width, rgba.height, options.dpi || 300),
+      extension: 'tif',
+    }
+  }
+  return {
+    blob: encodePngRgba(rgba.data, rgba.width, rgba.height, options.dpi || 300),
+    extension: 'png',
+  }
 }
 
 export async function processPreviewDataUrl(
-  filePath: string,
+  source: Blob,
   options: ProcessOptions,
   maxEdge = 1200,
 ): Promise<string> {
-  const sharp = (await import('sharp')).default
-  const png = await processCardImage(filePath, options)
-  const resized = await sharp(png)
-    .resize({
-      width: maxEdge,
-      height: maxEdge,
-      fit: 'inside',
-      withoutEnlargement: true,
-    })
-    .png()
-    .toBuffer()
-  return `data:image/png;base64,${resized.toString('base64')}`
+  const rgba = await processCardRgba(source, options)
+  let { data, width, height } = rgba
+
+  const maxDim = Math.max(width, height)
+  if (maxDim > maxEdge) {
+    const scale = maxEdge / maxDim
+    const w = Math.max(1, Math.round(width * scale))
+    const h = Math.max(1, Math.round(height * scale))
+    const { ctx } = canvas2d(width, height)
+    const img = new ImageData(new Uint8ClampedArray(data), width, height)
+    ctx.putImageData(img, 0, 0)
+    const { canvas: outCanvas, ctx: outCtx } = canvas2d(w, h)
+    outCtx.imageSmoothingEnabled = true
+    outCtx.imageSmoothingQuality = 'high'
+    outCtx.drawImage(ctx.canvas as CanvasImageSource, 0, 0, w, h)
+    const scaled = outCtx.getImageData(0, 0, w, h)
+    data = new Uint8Array(scaled.data)
+    width = w
+    height = h
+    void outCanvas
+  }
+
+  const blob = encodePngRgba(data, width, height, options.dpi || 300)
+  return URL.createObjectURL(blob)
+}
+
+export async function readOriginalDataUrl(source: Blob, maxEdge = 1200): Promise<string> {
+  const bitmap = await decodeBitmap(source)
+  try {
+    let w = bitmap.width
+    let h = bitmap.height
+    const maxDim = Math.max(w, h)
+    if (maxDim > maxEdge) {
+      const scale = maxEdge / maxDim
+      w = Math.max(1, Math.round(w * scale))
+      h = Math.max(1, Math.round(h * scale))
+    }
+    const { canvas, ctx } = canvas2d(w, h)
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(bitmap, 0, 0, w, h)
+
+    if ('convertToBlob' in canvas) {
+      const blob = await (canvas as OffscreenCanvas).convertToBlob({ type: 'image/png' })
+      return URL.createObjectURL(blob)
+    }
+    return (canvas as HTMLCanvasElement).toDataURL('image/png')
+  } finally {
+    bitmap.close()
+  }
 }

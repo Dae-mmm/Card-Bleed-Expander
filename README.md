@@ -1,69 +1,45 @@
 # Card Bleed Expander
 
-App desktop per espandere i bordi delle carte da gioco con margini di stampa (bleed), correzione angoli stondati e crocini di taglio.
+Web app to expand playing-card edges for print bleed, rounded corners, and crop marks.
 
-## Requisiti
+Everything runs **in the browser**. Card images never leave your device — there is no upload and no server-side storage.
+
+## Stack
+
+- React + Vite
+- Client-side image pipeline (Canvas)
+- Deployable as a static site on [Vercel](https://vercel.com)
+
+## Requirements
 
 - Node.js 20+
-- macOS (per creare anche i pacchetti Mac)
 
-## Avvio sviluppo
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-> Se Electron non parte e vedi errori su `app.whenReady`, assicurati che `ELECTRON_RUN_AS_NODE` non sia impostata (lo script `dev` la azzera già).
-
-## Pacchetto pronto per la dist
-
-Prepara typecheck + build + binari nativi sharp (Mac arm64/x64 + Windows x64):
+## Build
 
 ```bash
-npm install
-npm run pack
+npm run build
 ```
 
-Questo produce:
-- `dist/` (UI)
-- `dist-electron/` (main/preload)
-- moduli `@img/sharp-*` per Mac e Windows in `node_modules`
+Output goes to `dist/` (static files). Preview locally with `npm run preview`.
 
-Poi crea gli installabili:
+## Deploy on Vercel
 
-```bash
-# Solo Mac
-npm run dist:mac
+Connect the repo and deploy. `vercel.json` is already set for SPA routing. No serverless functions or storage required.
 
-# Solo Windows
-npm run dist:win
+## Usage
 
-# Entrambi
-npm run dist
-```
+1. **Open…** a folder of cards (Chrome/Edge can use the directory picker; other browsers fall back to a folder file dialog)
+2. Adjust border/corners, trim, 63×88 size, bleed, RGB/CMYK
+3. Optionally **Choose save folder** (Chromium) — otherwise files download to your Downloads folder
+4. **Save** / **Save & next** / **Save all**
 
-Gli artefatti finiscono in `release/` (versione attuale **1.1.0**):
+## Privacy
 
-| Piattaforma | File tipici |
-|---|---|
-| Mac Apple Silicon | `Card Bleed Expander-1.1.0-arm64.dmg` |
-| Mac Intel | `Card Bleed Expander-1.1.0.dmg` |
-| Windows installer | `Card Bleed Expander Setup 1.1.0.exe` |
-| Windows portable | `Card Bleed Expander 1.1.0.exe` |
-
-### Note packaging
-
-- Lo script `sharp:platforms` è obbligatorio prima della dist Windows/Mac cross: altrimenti su PC restano i binari Darwin e l’app non elabora le immagini.
-- Su Mac, al primo avvio Gatekeeper può avvisare (app non firmata). Tasto destro → Apri, oppure:
-  ```bash
-  xattr -cr "/Applications/Card Bleed Expander.app"
-  ```
-- Su Windows SmartScreen può mostrare un avviso finché l’exe non è firmato.
-
-## Uso rapido
-
-1. **Apri…** una cartella di carte
-2. Regola bordo/angoli, taglio, misura 63×88, bleed, RGB/CMYK
-3. **Salva** / **Salva e successiva** / **Salva tutto** (⇧Invio)
-4. Output in `output/` accanto alla cartella sorgente (PNG o TIFF CMYK)
+Processing is 100% local. The only network request from the app UI is the optional Ko-fi support widget script.

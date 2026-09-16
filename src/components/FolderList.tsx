@@ -1,9 +1,9 @@
-import { fileName } from '../lib/ipc'
 import { useI18n } from '../i18n'
 
 interface FolderListProps {
   folderPath: string | null
   files: string[]
+  fileLabels?: string[]
   selectedIndex: number
   saved: Set<string>
   onSelect: (index: number) => void
@@ -13,6 +13,7 @@ interface FolderListProps {
 export function FolderList({
   folderPath,
   files,
+  fileLabels,
   selectedIndex,
   saved,
   onSelect,
@@ -39,7 +40,7 @@ export function FolderList({
 
       <ul className="file-list">
         {files.map((file, index) => {
-          const name = fileName(file)
+          const name = fileLabels?.[index] ?? file.split(/[/\\]/).pop() ?? file
           const isSaved = saved.has(file)
           const isActive = index === selectedIndex
           return (

@@ -5,7 +5,8 @@ const it: Dictionary = {
   settings: 'Impostazioni',
   folder: 'Cartella',
   openFolder: 'Apri…',
-  openFolderHint: 'Apri una cartella con le carte da processare.',
+  openFolderHint:
+    'Apri una cartella con le carte. Tutto resta nel browser — i file non lasciano il tuo dispositivo.',
   prev: '← Prec',
   next: 'Succ →',
   statusTodo: 'da fare',
@@ -44,7 +45,7 @@ const it: Dictionary = {
   cornerRadius: 'Raggio angoli (mm)',
   colorSpace: 'Spazio colore',
   colorSpaceHint:
-    'RGB salva PNG. CMYK converte in stampa e salva TIFF (l’anteprima resta in RGB).',
+    'RGB salva PNG. CMYK converte in stampa e salva TIFF (conversione soft; l’anteprima resta in RGB).',
   bleed: 'Bleed (mm)',
   whiteThreshold: 'Soglia bianco JPEG',
   whiteThresholdHint:
@@ -56,6 +57,9 @@ const it: Dictionary = {
   saveAndNext: 'Salva e successiva',
   saveAll: 'Salva tutto',
   openOutput: 'Apri cartella output',
+  chooseOutput: 'Scegli cartella di salvataggio',
+  changeOutput: 'Cambia cartella di salvataggio',
+  outputFolderLabel: 'Salvataggio in: {folder}',
   setDefaultFollowing: 'Imposta questo valore come predefinito per le carte successive',
   setDefaultSize: 'Imposta misura e ridimensionamento come predefinito per le carte successive',
   setDefaultColorSpace: 'Imposta RGB/CMYK come predefinito per le carte successive',

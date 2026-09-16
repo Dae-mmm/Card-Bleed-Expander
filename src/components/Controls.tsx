@@ -24,6 +24,8 @@ interface ControlsProps {
   hasSelection: boolean
   hasFiles: boolean
   hasOutput: boolean
+  outputLabel?: string | null
+  canPickOutputFolder?: boolean
   hasFollowing: boolean
 }
 
@@ -154,6 +156,8 @@ export function Controls({
   hasSelection,
   hasFiles,
   hasOutput,
+  outputLabel,
+  canPickOutputFolder = true,
   hasFollowing,
 }: ControlsProps) {
   const { t } = useI18n()
@@ -543,14 +547,20 @@ export function Controls({
         >
           {t('saveAll')}
         </button>
-        <button
-          type="button"
-          className="secondary"
-          onClick={onOpenOutput}
-          disabled={!hasOutput || busy}
-        >
-          {t('openOutput')}
-        </button>
+        {canPickOutputFolder && (
+          <button
+            type="button"
+            className="secondary"
+            onClick={onOpenOutput}
+            disabled={busy}
+            title={outputLabel ? t('outputFolderLabel', { folder: outputLabel }) : undefined}
+          >
+            {hasOutput ? t('changeOutput') : t('chooseOutput')}
+          </button>
+        )}
+        {!canPickOutputFolder && hasOutput && outputLabel && (
+          <p className="hint">{t('outputFolderLabel', { folder: outputLabel })}</p>
+        )}
       </div>
     </aside>
   )
