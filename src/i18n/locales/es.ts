@@ -93,7 +93,7 @@ const es: Dictionary = {
   importTitle: 'Importar lista de cartas',
   importIntro: 'Pega un mazo/lista. Las imágenes se descargan de APIs públicas en esta sesión del navegador (no se suben a nuestro servidor). Respeta términos y copyright de cada juego para uso personal.',
   importListLabel: 'Lista de cartas',
-  importFormatHint: 'Una carta por línea, p. ej. “4 Lightning Bolt” o “3 Dark Magician”. Set opcional: “1 Sol Ring (C21)”.',
+  importFormatHint: 'Una carta por línea. Set + número de coleccionista opcionales: "1 Sol Ring (C21) 10". Si faltan, se usa la impresión más reciente.',
   importGameMtg: 'Magic',
   importGamePokemon: 'Pokémon',
   importGameYugioh: 'Yu-Gi-Oh!',

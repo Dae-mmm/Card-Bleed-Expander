@@ -1,11 +1,11 @@
 import type { ParsedCardLine, ResolvedCardImage } from './types'
-import { sanitizeFileName, sleep } from './types'
+import { failureLabel, lineKey, sanitizeFileName, sleep } from './types'
 
 type PokemonCard = {
   id?: string
   name?: string
   number?: string
-  set?: { id?: string; name?: string }
+  set?: { id?: string; name?: string; releaseDate?: string }
   images?: { large?: string; small?: string }
 }
 
@@ -13,18 +13,24 @@ type PokemonResponse = {
   data?: PokemonCard[]
 }
 
+/**
+ * Resolve printings:
+ * - set + number → that exact card
+ * - set only → that set, prefer exact name
+ * - name only → most recent set release
+ */
 export async function resolvePokemonCards(
   lines: ParsedCardLine[],
   onProgress?: (current: number, total: number, label: string) => void,
 ): Promise<{ resolved: ResolvedCardImage[]; failures: { name: string; reason: string }[] }> {
   const unique = new Map<string, ParsedCardLine>()
   for (const line of lines) {
-    const key = line.name.toLowerCase()
+    const key = lineKey(line)
     if (!unique.has(key)) unique.set(key, line)
   }
 
   const entries = [...unique.values()]
-  const foundByName = new Map<string, ResolvedCardImage>()
+  const foundByKey = new Map<string, ResolvedCardImage>()
   const failures: { name: string; reason: string }[] = []
 
   for (let i = 0; i < entries.length; i++) {
@@ -32,31 +38,31 @@ export async function resolvePokemonCards(
     onProgress?.(i, entries.length, line.name)
 
     try {
-      const card = await fetchPokemonCard(line.name, line.setHint)
+      const card = await fetchPokemonCard(line)
       if (!card) {
-        failures.push({ name: line.name, reason: 'Not found on Pokémon TCG API' })
+        failures.push({ name: failureLabel(line), reason: 'Not found on Pokémon TCG API' })
       } else {
         const imageUrl = card.images?.large || card.images?.small
         if (!imageUrl) {
-          failures.push({ name: line.name, reason: 'No image on Pokémon TCG API' })
+          failures.push({ name: failureLabel(line), reason: 'No image on Pokémon TCG API' })
         } else {
           const name = card.name || line.name
           const id = card.id || ''
-          foundByName.set(line.name.toLowerCase(), {
+          foundByKey.set(lineKey(line), {
             name,
             fileName: `${sanitizeFileName(name)}${id ? `-${id}` : ''}.png`,
             imageUrl,
             quantity: 1,
             source: 'pokemon',
-            detail: card.set?.name
-              ? `${card.set.name}${card.number ? ` #${card.number}` : ''}`
+            detail: card.set?.id
+              ? `${card.set.id.toUpperCase()}${card.number ? ` #${card.number}` : ''}`
               : id || undefined,
           })
         }
       }
     } catch (err) {
       failures.push({
-        name: line.name,
+        name: failureLabel(line),
         reason: err instanceof Error ? err.message : 'Pokémon TCG API error',
       })
     }
@@ -67,7 +73,7 @@ export async function resolvePokemonCards(
 
   const expanded: ResolvedCardImage[] = []
   for (const line of lines) {
-    const hit = foundByName.get(line.name.toLowerCase())
+    const hit = foundByKey.get(lineKey(line))
     if (!hit) continue
     expanded.push({ ...hit, quantity: line.quantity })
   }
@@ -75,29 +81,53 @@ export async function resolvePokemonCards(
   return { resolved: expanded, failures }
 }
 
-async function fetchPokemonCard(name: string, setHint?: string): Promise<PokemonCard | null> {
-  // Exact-ish name match; optional set id filter
-  const parts = [`name:"${name.replace(/"/g, '')}"`]
-  if (setHint) parts.push(`set.id:${setHint}`)
-  const q = parts.join(' ')
-  const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&pageSize=5&orderBy=-set.releaseDate`
+async function fetchPokemonCard(line: ParsedCardLine): Promise<PokemonCard | null> {
+  const safeName = line.name.replace(/"/g, '')
+  const parts = [`name:"${safeName}"`]
+  if (line.setHint) parts.push(`set.id:${line.setHint.toLowerCase()}`)
+  if (line.collectorNumber) parts.push(`number:"${line.collectorNumber}"`)
 
+  const data = await searchPokemon(parts.join(' '))
+  if (data.length > 0) {
+    return pickBest(data, line)
+  }
+
+  // Fallback: looser name (+ optional set)
+  const looseParts = [`name:${safeName}`]
+  if (line.setHint) looseParts.push(`set.id:${line.setHint.toLowerCase()}`)
+  const loose = await searchPokemon(looseParts.join(' '))
+  if (loose.length === 0) return null
+  return pickBest(loose, line)
+}
+
+async function searchPokemon(q: string): Promise<PokemonCard[]> {
+  const url =
+    `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}` +
+    `&pageSize=20&orderBy=-set.releaseDate`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Pokémon TCG API HTTP ${res.status}`)
   const json = (await res.json()) as PokemonResponse
-  const data = json.data || []
-  if (data.length === 0) {
-    // Fallback: looser name search
-    const loose = await fetch(
-      `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(`name:${name}`)}&pageSize=5&orderBy=-set.releaseDate`,
+  return json.data || []
+}
+
+function pickBest(data: PokemonCard[], line: ParsedCardLine): PokemonCard {
+  const exactName = data.filter((c) => (c.name || '').toLowerCase() === line.name.toLowerCase())
+  const pool = exactName.length > 0 ? exactName : data
+
+  if (line.collectorNumber) {
+    const byNum = pool.find(
+      (c) => (c.number || '').toLowerCase() === line.collectorNumber!.toLowerCase(),
     )
-    if (!loose.ok) return null
-    const looseJson = (await loose.json()) as PokemonResponse
-    const looseData = looseJson.data || []
-    if (looseData.length === 0) return null
-    return (
-      looseData.find((c) => (c.name || '').toLowerCase() === name.toLowerCase()) || looseData[0]
-    )
+    if (byNum) return byNum
   }
-  return data.find((c) => (c.name || '').toLowerCase() === name.toLowerCase()) || data[0]
+
+  if (line.setHint) {
+    const bySet = pool.find(
+      (c) => (c.set?.id || '').toLowerCase() === line.setHint!.toLowerCase(),
+    )
+    if (bySet) return bySet
+  }
+
+  // Already ordered by -set.releaseDate → most recent first
+  return pool[0]
 }

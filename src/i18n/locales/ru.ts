@@ -93,7 +93,7 @@ const ru: Dictionary = {
   importTitle: 'Импорт списка карт',
   importIntro: 'Вставьте колоду/список. Изображения скачиваются из публичных API в эту сессию браузера (не загружаются на наш сервер). Соблюдайте условия и авторские права для личного использования.',
   importListLabel: 'Список карт',
-  importFormatHint: 'Одна карта в строке, напр. “4 Lightning Bolt” или “3 Dark Magician”. Опционально сет: “1 Sol Ring (C21)”.',
+  importFormatHint: 'Одна карта в строке. Опционально сет + номер: "1 Sol Ring (C21) 10". Если нет — берётся самое новое издание.',
   importGameMtg: 'Magic',
   importGamePokemon: 'Pokémon',
   importGameYugioh: 'Yu-Gi-Oh!',

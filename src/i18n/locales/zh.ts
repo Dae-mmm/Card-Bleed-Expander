@@ -91,7 +91,7 @@ const zh: Dictionary = {
   importTitle: '导入卡牌列表',
   importIntro: '粘贴卡组/列表。图片会从公开 API 下载到本浏览器会话（不会上传到我们的服务器）。请遵守各游戏的条款与版权，仅供个人使用。',
   importListLabel: '卡牌列表',
-  importFormatHint: '每行一张，例如 “4 Lightning Bolt” 或 “3 Dark Magician”。可选系列：“1 Sol Ring (C21)”。',
+  importFormatHint: '每行一张。可选系列+收藏编号："1 Sol Ring (C21) 10"。若省略则使用最新印刷版本。',
   importGameMtg: 'Magic',
   importGamePokemon: 'Pokémon',
   importGameYugioh: 'Yu-Gi-Oh!',

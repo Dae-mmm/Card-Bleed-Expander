@@ -93,7 +93,7 @@ const de: Dictionary = {
   importTitle: 'Kartenliste importieren',
   importIntro: 'Füge eine Deck/Liste ein. Bilder werden aus öffentlichen APIs in diese Browsersitzung geladen (kein Upload auf unseren Server). Beachte Nutzungsbedingungen und Copyright für privaten Gebrauch.',
   importListLabel: 'Kartenliste',
-  importFormatHint: 'Eine Karte pro Zeile, z. B. „4 Lightning Bolt“ oder „3 Dark Magician“. Optional Set: „1 Sol Ring (C21)“.',
+  importFormatHint: 'Eine Karte pro Zeile. Optional Set + Collector Number: "1 Sol Ring (C21) 10". Sonst die neueste Auflage.',
   importGameMtg: 'Magic',
   importGamePokemon: 'Pokémon',
   importGameYugioh: 'Yu-Gi-Oh!',

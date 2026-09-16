@@ -22,14 +22,14 @@ const GAMES: { id: CardGame; labelKey: 'importGameMtg' | 'importGamePokemon' | '
 
 const PLACEHOLDERS: Record<CardGame, string> = {
   mtg: `4 Lightning Bolt
-4 Counterspell
-1 Sol Ring
-1 Black Lotus (LEB)`,
+1 Sol Ring (C21)
+1 Black Lotus (LEB) 232
+1 Swords to Plowshares (MH3) 42`,
   pokemon: `4 Pikachu
-2 Charizard
-1 Professor's Research`,
+2 Charizard (sv3)
+1 Pikachu (base1) 58`,
   yugioh: `3 Dark Magician
-2 Blue-Eyes White Dragon
+2 Blue-Eyes White Dragon (LOB)
 1 Monster Reborn`,
 }
 

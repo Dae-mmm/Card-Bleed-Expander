@@ -3,8 +3,10 @@ export type CardGame = 'mtg' | 'pokemon' | 'yugioh'
 export interface ParsedCardLine {
   quantity: number
   name: string
-  /** Optional set code / collector number hint from the list line */
+  /** Optional set code from the list line, e.g. MH3 / swsh8 / LOB */
   setHint?: string
+  /** Optional collector / card number within the set */
+  collectorNumber?: string
   raw: string
 }
 
@@ -42,9 +44,22 @@ const SKIP_PREFIXES = [
   /^\/\//,
 ]
 
+/** Stable key so the same name with different printings stays distinct. */
+export function lineKey(line: ParsedCardLine): string {
+  return [
+    line.name.toLowerCase(),
+    (line.setHint || '').toLowerCase(),
+    (line.collectorNumber || '').toLowerCase(),
+  ].join('|')
+}
+
 /**
- * Parse a plain deck/list: lines like `4 Lightning Bolt`, `1x Sol Ring`,
- * `Lightning Bolt`, or `3 Dark Magician (LOB)`.
+ * Parse a plain deck/list.
+ * Supported shapes:
+ * - `4 Lightning Bolt`
+ * - `1x Sol Ring (C21)`
+ * - `1 Sol Ring (C21) 10`  (Arena / set + collector number)
+ * - `3 Dark Magician (LOB)`
  */
 export function parseCardList(text: string): ParsedCardLine[] {
   const lines = text.split(/\r?\n/)
@@ -55,21 +70,45 @@ export function parseCardList(text: string): ParsedCardLine[] {
     if (!raw) continue
     if (SKIP_PREFIXES.some((re) => re.test(raw))) continue
 
-    // 4 Card Name / 4x Card Name / 4x Card Name (SET) / Card Name
-    const match = raw.match(
-      /^(?:(\d+)\s*[x×]?\s+)?(.+?)(?:\s+\(([A-Za-z0-9_-]+)\))?\s*$/,
-    )
-    if (!match) continue
+    let rest = raw
+    let quantity = 1
+    const qtyMatch = rest.match(/^(\d+)\s*[x×]?\s+(.*)$/i)
+    if (qtyMatch) {
+      quantity = Math.max(1, Math.min(99, Number(qtyMatch[1])))
+      rest = qtyMatch[2].trim()
+    }
 
-    const quantity = Math.max(1, Math.min(99, Number(match[1] || 1)))
-    let name = (match[2] || '').trim()
-    const setHint = match[3]?.trim()
+    // Name (SET) collectorNumber
+    let match = rest.match(/^(.*?)\s+[\(\[]([A-Za-z0-9_-]+)[\)\]]\s+(\S+)\s*$/)
+    if (match) {
+      const name = match[1].trim()
+      if (!name) continue
+      out.push({
+        quantity,
+        name,
+        setHint: match[2].trim(),
+        collectorNumber: match[3].trim(),
+        raw,
+      })
+      continue
+    }
 
-    // Strip trailing set codes like "Lightning Bolt SET" only when already captured
-    name = name.replace(/\s+$/, '')
-    if (!name) continue
+    // Name (SET)
+    match = rest.match(/^(.*?)\s+[\(\[]([A-Za-z0-9_-]+)[\)\]]\s*$/)
+    if (match) {
+      const name = match[1].trim()
+      if (!name) continue
+      out.push({
+        quantity,
+        name,
+        setHint: match[2].trim(),
+        raw,
+      })
+      continue
+    }
 
-    out.push({ quantity, name, setHint, raw })
+    if (!rest) continue
+    out.push({ quantity, name: rest, raw })
   }
 
   return out
@@ -104,4 +143,9 @@ export function sanitizeFileName(name: string): string {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 120)
+}
+
+export function failureLabel(line: ParsedCardLine): string {
+  const set = line.setHint ? ` (${line.setHint}` + (line.collectorNumber ? ` ${line.collectorNumber}` : '') + ')' : ''
+  return `${line.name}${set}`
 }

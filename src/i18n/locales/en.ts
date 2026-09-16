@@ -95,7 +95,8 @@ const en: Dictionary = {
   importIntro:
     'Paste a deck/list. Images are downloaded from public APIs into this browser session (not uploaded to our server). Respect each game’s terms and copyright for personal use.',
   importListLabel: 'Card list',
-  importFormatHint: 'One card per line, e.g. “4 Lightning Bolt” or “3 Dark Magician”. Optional set: “1 Sol Ring (C21)”.',
+  importFormatHint:
+    'One card per line. Optional set + collector number: “1 Sol Ring (C21) 10”. If omitted, the most recent printing is used.',
   importGameMtg: 'Magic',
   importGamePokemon: 'Pokémon',
   importGameYugioh: 'Yu-Gi-Oh!',
