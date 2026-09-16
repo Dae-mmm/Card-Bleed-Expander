@@ -74,6 +74,10 @@ const en: Dictionary = {
   errorDetectFailed: 'Color detection failed',
   errorSave: 'Save error',
   errorSaveAll: 'Error while saving all cards',
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
+  zoomReset: 'Reset zoom',
+  zoomHint: 'Scroll zoom · drag pan · double-click reset',
 }
 
 export default en

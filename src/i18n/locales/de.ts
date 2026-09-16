@@ -74,6 +74,10 @@ const de: Dictionary = {
   errorDetectFailed: 'Farberkennung fehlgeschlagen',
   errorSave: 'Fehler beim Speichern',
   errorSaveAll: 'Fehler beim Speichern aller Karten',
+  zoomIn: 'Vergrößern',
+  zoomOut: 'Verkleinern',
+  zoomReset: 'Zoom zurücksetzen',
+  zoomHint: 'Scrollen zoom · ziehen pan · Doppelklick reset',
 }
 
 export default de

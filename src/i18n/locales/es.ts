@@ -74,6 +74,10 @@ const es: Dictionary = {
   errorDetectFailed: 'No se pudo detectar el color',
   errorSave: 'Error al guardar',
   errorSaveAll: 'Error al guardar todas las cartas',
+  zoomIn: 'Acercar',
+  zoomOut: 'Alejar',
+  zoomReset: 'Restablecer zoom',
+  zoomHint: 'Scroll zoom · arrastrar pan · doble clic reset',
 }
 
 export default es

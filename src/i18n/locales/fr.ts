@@ -74,6 +74,10 @@ const fr: Dictionary = {
   errorDetectFailed: 'Détection des couleurs impossible',
   errorSave: 'Erreur d’enregistrement',
   errorSaveAll: 'Erreur lors de l’enregistrement de toutes les cartes',
+  zoomIn: 'Zoom avant',
+  zoomOut: 'Zoom arrière',
+  zoomReset: 'Réinitialiser le zoom',
+  zoomHint: 'Molette zoom · glisser pan · double-clic reset',
 }
 
 export default fr

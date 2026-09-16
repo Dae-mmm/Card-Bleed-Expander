@@ -74,6 +74,10 @@ const it: Dictionary = {
   errorDetectFailed: 'Rilevamento colori non riuscito',
   errorSave: 'Errore durante il salvataggio',
   errorSaveAll: 'Errore durante il salvataggio di tutte le carte',
+  zoomIn: 'Ingrandisci',
+  zoomOut: 'Riduci',
+  zoomReset: 'Reimposta zoom',
+  zoomHint: 'Scroll zoom · trascina pan · doppio clic reset',
 }
 
 export default it

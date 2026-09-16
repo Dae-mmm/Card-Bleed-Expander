@@ -71,6 +71,10 @@ const zh: Dictionary = {
   errorDetectFailed: '颜色检测失败',
   errorSave: '保存出错',
   errorSaveAll: '保存全部卡牌时出错',
+  zoomIn: '放大',
+  zoomOut: '缩小',
+  zoomReset: '重置缩放',
+  zoomHint: '滚轮缩放 · 拖动平移 · 双击重置',
 }
 
 export default zh

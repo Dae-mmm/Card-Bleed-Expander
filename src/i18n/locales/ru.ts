@@ -74,6 +74,10 @@ const ru: Dictionary = {
   errorDetectFailed: 'Не удалось определить цвета',
   errorSave: 'Ошибка сохранения',
   errorSaveAll: 'Ошибка при сохранении всех карт',
+  zoomIn: 'Увеличить',
+  zoomOut: 'Уменьшить',
+  zoomReset: 'Сбросить масштаб',
+  zoomHint: 'Колесо zoom · перетаскивание pan · двойной клик reset',
 }
 
 export default ru
