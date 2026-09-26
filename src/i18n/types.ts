@@ -110,5 +110,9 @@ export type TranslationKey =
   | 'importPhaseDownload'
   | 'importNoneFound'
   | 'importError'
+  | 'hideFolder'
+  | 'showFolder'
+  | 'hideControls'
+  | 'showControls'
 
 export type Dictionary = Record<TranslationKey, string>

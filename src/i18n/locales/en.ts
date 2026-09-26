@@ -107,6 +107,10 @@ const en: Dictionary = {
   importPhaseDownload: 'Downloading',
   importNoneFound: 'No cards could be imported',
   importError: 'Import failed',
+  hideFolder: 'Hide folder',
+  showFolder: 'Show folder',
+  hideControls: 'Hide settings',
+  showControls: 'Show settings',
 }
 
 export default en

@@ -102,6 +102,10 @@ const zh: Dictionary = {
   importPhaseDownload: '下载',
   importNoneFound: '未能导入任何卡牌',
   importError: '导入失败',
+  hideFolder: '隐藏文件夹',
+  showFolder: '显示文件夹',
+  hideControls: '隐藏设置',
+  showControls: '显示设置',
 }
 
 export default zh

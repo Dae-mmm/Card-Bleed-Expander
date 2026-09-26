@@ -24,7 +24,7 @@ export function FolderList({
   const { t } = useI18n()
 
   return (
-    <aside className="panel folder-list">
+    <aside id="folder-panel" className="panel folder-list">
       <header className="panel-header">
         <h2>{t('folder')}</h2>
         <div className="folder-actions">

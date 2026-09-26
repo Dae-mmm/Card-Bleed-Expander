@@ -30,6 +30,21 @@ import { FeedbackWidget } from './components/FeedbackWidget'
 import { ImportListDialog } from './components/ImportListDialog'
 import type { CardGame, ImportResult } from './lib/cardImport'
 
+function SideChevron({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <path
+        d={direction === 'left' ? 'M10.5 3.5 6 8l4.5 4.5' : 'M5.5 3.5 10 8l-4.5 4.5'}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 function cloneDefaults(base: ProcessOptions = DEFAULT_OPTIONS): ProcessOptions {
   return {
     ...base,
@@ -99,6 +114,8 @@ export default function App() {
     cloneDefaults(),
   )
   const [importOpen, setImportOpen] = useState(false)
+  const [folderOpen, setFolderOpen] = useState(true)
+  const [controlsOpen, setControlsOpen] = useState(true)
 
   const requestId = useRef(0)
   const autoSampled = useRef<Set<string>>(new Set())
@@ -491,19 +508,33 @@ export default function App() {
   const fileIds = useMemo(() => files.map((f) => f.id), [files])
 
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell${folderOpen ? '' : ' hide-folder'}${controlsOpen ? '' : ' hide-controls'}`}
+    >
       <KofiWidget />
       <FeedbackWidget />
-      <FolderList
-        folderPath={folderPath}
-        files={fileIds}
-        fileLabels={files.map((f) => f.name)}
-        selectedIndex={selectedIndex}
-        saved={saved}
-        onSelect={setSelectedIndex}
-        onOpenFolder={() => void handleOpenFolder()}
-        onImportList={() => setImportOpen(true)}
-      />
+      <div className="side side-left">
+        <FolderList
+          folderPath={folderPath}
+          files={fileIds}
+          fileLabels={files.map((f) => f.name)}
+          selectedIndex={selectedIndex}
+          saved={saved}
+          onSelect={setSelectedIndex}
+          onOpenFolder={() => void handleOpenFolder()}
+          onImportList={() => setImportOpen(true)}
+        />
+        <button
+          type="button"
+          className="side-toggle"
+          aria-expanded={folderOpen}
+          aria-controls="folder-panel"
+          aria-label={folderOpen ? t('hideFolder') : t('showFolder')}
+          onClick={() => setFolderOpen((open) => !open)}
+        >
+          <SideChevron direction={folderOpen ? 'left' : 'right'} />
+        </button>
+      </div>
       <Preview
         previewUrl={previewUrl}
         originalUrl={originalUrl}
@@ -514,24 +545,36 @@ export default function App() {
         metaLabel={metaLabel}
         error={error}
       />
-      <Controls
-        options={options}
-        onChange={setOptions}
-        onApplyToAll={handleApplyToAll}
-        onApplyToFollowing={handleApplyToFollowing}
-        onDetectCorners={() => void handleDetectCorners()}
-        onSave={() => void handleSave(false)}
-        onSaveAndNext={() => void handleSave(true)}
-        onSaveAll={() => void handleSaveAll()}
-        onOpenOutput={() => void handleChooseOutput()}
-        busy={busy}
-        hasSelection={Boolean(selectedFile)}
-        hasFiles={files.length > 0}
-        hasOutput={hasOutputFolder() || Boolean(outputDir)}
-        outputLabel={outputDir}
-        canPickOutputFolder={supportsDirectoryPicker()}
-        hasFollowing={selectedIndex < files.length - 1}
-      />
+      <div className="side side-right">
+        <button
+          type="button"
+          className="side-toggle"
+          aria-expanded={controlsOpen}
+          aria-controls="controls-panel"
+          aria-label={controlsOpen ? t('hideControls') : t('showControls')}
+          onClick={() => setControlsOpen((open) => !open)}
+        >
+          <SideChevron direction={controlsOpen ? 'right' : 'left'} />
+        </button>
+        <Controls
+          options={options}
+          onChange={setOptions}
+          onApplyToAll={handleApplyToAll}
+          onApplyToFollowing={handleApplyToFollowing}
+          onDetectCorners={() => void handleDetectCorners()}
+          onSave={() => void handleSave(false)}
+          onSaveAndNext={() => void handleSave(true)}
+          onSaveAll={() => void handleSaveAll()}
+          onOpenOutput={() => void handleChooseOutput()}
+          busy={busy}
+          hasSelection={Boolean(selectedFile)}
+          hasFiles={files.length > 0}
+          hasOutput={hasOutputFolder() || Boolean(outputDir)}
+          outputLabel={outputDir}
+          canPickOutputFolder={supportsDirectoryPicker()}
+          hasFollowing={selectedIndex < files.length - 1}
+        />
+      </div>
       <ImportListDialog
         open={importOpen}
         onClose={() => setImportOpen(false)}

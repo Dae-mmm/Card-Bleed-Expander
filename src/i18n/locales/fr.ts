@@ -104,6 +104,10 @@ const fr: Dictionary = {
   importPhaseDownload: 'Téléchargement',
   importNoneFound: 'Aucune carte importée',
   importError: 'Échec de l’import',
+  hideFolder: 'Masquer le dossier',
+  showFolder: 'Afficher le dossier',
+  hideControls: 'Masquer les réglages',
+  showControls: 'Afficher les réglages',
 }
 
 export default fr

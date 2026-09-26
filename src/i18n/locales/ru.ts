@@ -104,6 +104,10 @@ const ru: Dictionary = {
   importPhaseDownload: 'Загрузка',
   importNoneFound: 'Не удалось импортировать карты',
   importError: 'Ошибка импорта',
+  hideFolder: 'Скрыть папку',
+  showFolder: 'Показать папку',
+  hideControls: 'Скрыть настройки',
+  showControls: 'Показать настройки',
 }
 
 export default ru

@@ -108,6 +108,10 @@ const it: Dictionary = {
   importPhaseDownload: 'Download',
   importNoneFound: 'Nessuna carta importata',
   importError: 'Import fallito',
+  hideFolder: 'Nascondi cartella',
+  showFolder: 'Mostra cartella',
+  hideControls: 'Nascondi impostazioni',
+  showControls: 'Mostra impostazioni',
 }
 
 export default it
