@@ -58,11 +58,13 @@ Create the app password with 2FA enabled on the Google account. The feedback rec
 4. Optionally **Choose save folder** (Chromium) — otherwise files download to your Downloads folder
 5. **Save** / **Save & next** / **Save all**
 6. Use **Feedbacks / issues report** (bottom center) to send private feedback
+7. Or **Import list…** to paste a Magic / Pokémon / Yu-Gi-Oh decklist and download art from Scryfall, Pokémon TCG API, or YGOPRODeck into the browser session
 
 ## Privacy
 
-Card processing is 100% local. Network requests from the UI:
+Card processing is 100% local after images are on your device. Network requests from the UI:
 
 - optional Ko-fi widget script
 - Vercel Analytics
 - `/api/feedback` when the user submits the feedback form (message only; recipient address stays on the server)
+- card-database APIs (Scryfall / Pokémon TCG / YGOPRODeck) only when you import a list — images are downloaded into the browser, not uploaded to our servers

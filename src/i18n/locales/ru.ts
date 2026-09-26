@@ -5,8 +5,7 @@ const ru: Dictionary = {
   settings: 'Настройки',
   folder: 'Папка',
   openFolder: 'Открыть…',
-  openFolderHint:
-    'Откройте папку с картами. Всё работает в браузере — файлы не покидают ваше устройство.',
+  openFolderHint: 'Откройте локальную папку или импортируйте список из Scryfall / Pokémon TCG / Yu-Gi-Oh.',
   prev: '← Назад',
   next: 'Далее →',
   statusTodo: 'не готово',
@@ -91,6 +90,20 @@ const ru: Dictionary = {
   feedbackSent: 'Спасибо — отзыв отправлен.',
   feedbackClose: 'Закрыть',
   feedbackError: 'Не удалось отправить. Попробуйте позже.',
+  importList: 'Импорт списка…',
+  importTitle: 'Импорт списка карт',
+  importIntro: 'Вставьте колоду/список. Изображения скачиваются из публичных API в эту сессию браузера (не загружаются на наш сервер). Соблюдайте условия и авторские права для личного использования.',
+  importListLabel: 'Список карт',
+  importFormatHint: 'Одна карта в строке. Опционально сет + номер: "1 Sol Ring (C21) 10". Если нет — берётся самое новое издание.',
+  importGameMtg: 'Magic',
+  importGamePokemon: 'Pokémon',
+  importGameYugioh: 'Yu-Gi-Oh!',
+  importStart: 'Импорт и загрузка',
+  importWorking: 'Обработка…',
+  importPhaseResolve: 'Поиск',
+  importPhaseDownload: 'Загрузка',
+  importNoneFound: 'Не удалось импортировать карты',
+  importError: 'Ошибка импорта',
 }
 
 export default ru

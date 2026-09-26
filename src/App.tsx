@@ -27,6 +27,8 @@ import {
 import { useI18n } from './i18n'
 import { KofiWidget } from './components/KofiWidget'
 import { FeedbackWidget } from './components/FeedbackWidget'
+import { ImportListDialog } from './components/ImportListDialog'
+import type { CardGame, ImportResult } from './lib/cardImport'
 
 function cloneDefaults(base: ProcessOptions = DEFAULT_OPTIONS): ProcessOptions {
   return {
@@ -96,6 +98,7 @@ export default function App() {
   const [sessionDefaults, setSessionDefaults] = useState<ProcessOptions>(() =>
     cloneDefaults(),
   )
+  const [importOpen, setImportOpen] = useState(false)
 
   const requestId = useRef(0)
   const autoSampled = useRef<Set<string>>(new Set())
@@ -158,6 +161,56 @@ export default function App() {
       return null
     })
     setError(null)
+  }, [])
+
+  const handleImportedList = useCallback((result: ImportResult, game: CardGame) => {
+    const defaults = cloneDefaults()
+    // Sensible print defaults per game size
+    if (game === 'yugioh') {
+      defaults.targetWidthMm = 59
+      defaults.targetHeightMm = 86
+    } else {
+      defaults.targetWidthMm = 63
+      defaults.targetHeightMm = 88
+    }
+
+    const initial: Record<string, ProcessOptions> = {}
+    for (const file of result.cards) {
+      initial[file.id] = cloneDefaults(defaults)
+    }
+    autoSampled.current = new Set()
+    setSessionDefaults(defaults)
+    setFolderPath(
+      game === 'mtg'
+        ? 'Imported · Magic (Scryfall)'
+        : game === 'pokemon'
+          ? 'Imported · Pokémon TCG'
+          : 'Imported · Yu-Gi-Oh!',
+    )
+    setFiles(result.cards)
+    setOptionsByFile(initial)
+    setSelectedIndex(0)
+    setSaved(new Set())
+    setOutputDir(getOutputLabel())
+    setPreviewUrl((prev) => {
+      revokeUrl(prev)
+      return null
+    })
+    setOriginalUrl((prev) => {
+      revokeUrl(prev)
+      return null
+    })
+    if (result.failures.length > 0) {
+      const sample = result.failures
+        .slice(0, 5)
+        .map((f) => `${f.name}: ${f.reason}`)
+        .join(' · ')
+      setError(
+        `${result.failures.length} card(s) skipped — ${sample}${result.failures.length > 5 ? '…' : ''}`,
+      )
+    } else {
+      setError(null)
+    }
   }, [])
 
   useEffect(() => {
@@ -449,6 +502,7 @@ export default function App() {
         saved={saved}
         onSelect={setSelectedIndex}
         onOpenFolder={() => void handleOpenFolder()}
+        onImportList={() => setImportOpen(true)}
       />
       <Preview
         previewUrl={previewUrl}
@@ -477,6 +531,11 @@ export default function App() {
         outputLabel={outputDir}
         canPickOutputFolder={supportsDirectoryPicker()}
         hasFollowing={selectedIndex < files.length - 1}
+      />
+      <ImportListDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={handleImportedList}
       />
     </div>
   )

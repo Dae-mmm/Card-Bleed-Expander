@@ -5,8 +5,7 @@ const fr: Dictionary = {
   settings: 'Réglages',
   folder: 'Dossier',
   openFolder: 'Ouvrir…',
-  openFolderHint:
-    'Ouvrez un dossier contenant les cartes. Tout reste dans le navigateur — les fichiers ne quittent pas votre appareil.',
+  openFolderHint: 'Ouvrez un dossier local, ou importez une liste depuis Scryfall / Pokémon TCG / Yu-Gi-Oh.',
   prev: '← Préc',
   next: 'Suiv →',
   statusTodo: 'à faire',
@@ -91,6 +90,20 @@ const fr: Dictionary = {
   feedbackSent: 'Merci — feedback envoyé.',
   feedbackClose: 'Fermer',
   feedbackError: 'Envoi impossible. Réessayez plus tard.',
+  importList: 'Importer liste…',
+  importTitle: 'Importer une liste de cartes',
+  importIntro: 'Collez un deck/liste. Les images sont téléchargées depuis des API publiques dans cette session navigateur (pas d’upload sur notre serveur). Respectez les conditions et le copyright de chaque jeu pour un usage personnel.',
+  importListLabel: 'Liste de cartes',
+  importFormatHint: 'Une carte par ligne. Set + numéro de collection optionnels: "1 Sol Ring (C21) 10". Sinon, la version la plus récente est utilisée.',
+  importGameMtg: 'Magic',
+  importGamePokemon: 'Pokémon',
+  importGameYugioh: 'Yu-Gi-Oh!',
+  importStart: 'Importer et télécharger',
+  importWorking: 'Traitement…',
+  importPhaseResolve: 'Recherche',
+  importPhaseDownload: 'Téléchargement',
+  importNoneFound: 'Aucune carte importée',
+  importError: 'Échec de l’import',
 }
 
 export default fr
