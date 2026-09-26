@@ -113,7 +113,15 @@ export function Preview({
     update()
     const ro = new ResizeObserver(update)
     ro.observe(el)
-    return () => ro.disconnect()
+    window.addEventListener('resize', update)
+    window.visualViewport?.addEventListener('resize', update)
+    window.visualViewport?.addEventListener('scroll', update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+      window.visualViewport?.removeEventListener('resize', update)
+      window.visualViewport?.removeEventListener('scroll', update)
+    }
   }, [])
 
   // Reset to fit whenever the displayed image changes
@@ -393,7 +401,7 @@ export function Preview({
             style={{
               width: imgSize.w || undefined,
               height: imgSize.h || undefined,
-              transform: `translate(${pan.x}px, ${pan.y}px) scale(${displayScale})`,
+              transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${displayScale})`,
             }}
           >
             <img
