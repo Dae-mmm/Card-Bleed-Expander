@@ -82,6 +82,7 @@ export type TranslationKey =
   | 'zoomIn'
   | 'zoomOut'
   | 'zoomReset'
+  | 'zoomFit'
   | 'zoomHint'
   | 'feedbackFab'
   | 'feedbackTitle'

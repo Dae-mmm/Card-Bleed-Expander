@@ -262,31 +262,34 @@ select {
 
 .preview-frame.has-image {
   cursor: grab;
+  touch-action: none;
 }
 
 .preview-frame.panning {
   cursor: grabbing;
 }
 
+.preview-frame.pinching {
+  cursor: grabbing;
+}
+
 .preview-transform {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
   transform-origin: center center;
   will-change: transform;
 }
 
 .preview-frame img {
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
+  max-width: none;
+  max-height: none;
   width: auto;
   height: auto;
-  object-fit: contain;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
   pointer-events: none;
   user-select: none;
+  -webkit-user-drag: none;
 }
 
 .zoom-controls {
@@ -308,6 +311,12 @@ select {
 .zoom-controls .zoom-label {
   min-width: 3.4rem;
   font-variant-numeric: tabular-nums;
+}
+
+.zoom-fit-btn {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.75rem;
 }
 
 .zoom-hint {

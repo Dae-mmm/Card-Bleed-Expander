@@ -77,7 +77,8 @@ const it: Dictionary = {
   zoomIn: 'Ingrandisci',
   zoomOut: 'Riduci',
   zoomReset: 'Reimposta zoom',
-  zoomHint: 'Scroll zoom · trascina pan · doppio clic reset',
+  zoomFit: 'Adatta',
+  zoomHint: 'Pinch / scroll zoom · trascina pan · doppio tap adatta',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: 'Invia feedback',
   feedbackIntro:
