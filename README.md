@@ -64,7 +64,5 @@ Create the app password with 2FA enabled on the Google account. The feedback rec
 
 Card processing is 100% local after images are on your device. Network requests from the UI:
 
-- optional Ko-fi widget script
-- Vercel Analytics
 - `/api/feedback` when the user submits the feedback form (message only; recipient address stays on the server)
 - card-database APIs (Scryfall / Pokémon TCG / YGOPRODeck) only when you import a list — images are downloaded into the browser, not uploaded to our servers
