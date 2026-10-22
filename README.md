@@ -1,68 +1,101 @@
 # Card Bleed Expander
 
-Web app to expand playing-card edges for print bleed, rounded corners, and crop marks.
+**Print-ready playing cards in one click: bleed, rounded corners and crop marks, all in your browser.**
 
-Everything runs **in the browser**. Card images never leave your device — there is no upload and no server-side storage for card files.
+[**Try it live →**](https://card-bleed-expander.vercel.app) · Free · No account · Your images never leave your device
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/daemmm)
+![Before and after: a card with its edges extended for print bleed](docs/ui-preview.png)
 
-## Stack
+---
+
+## Why I built it
+
+My partner and I print cards for tabletop games at home. Card images rarely include **bleed**, the extra margin a printer needs so nothing gets cut off, so every card had to be fixed by hand in an image editor. Finding the images in the first place was just as slow.
+
+This tool removes both steps: paste a deck list, download the images, and export print-ready files for the whole deck in one go.
+
+## Features
+
+- **Automatic bleed** for any card image, at the standard 63 × 88 mm size
+- **Rounded-corner fill**, so scans with transparent or white corners print cleanly
+- **Crop marks**, trim and border adjustments
+- **RGB or CMYK** output for home or professional printing
+- **Batch processing**: open a whole folder, then *Save*, *Save & next* or *Save all*
+- **Deck-list import** for Magic: The Gathering, Pokémon and Yu-Gi-Oh!, using public card databases
+- **Private feedback form** built into the app
+
+![Deck-list import](docs/importList.png)
+
+## How it works
+
+The image pipeline runs entirely client-side on an HTML Canvas.
+
+1. **Edges.** The outermost row and column of pixels are repeated outwards to the required bleed width. Card borders are usually flat colour, so this is invisible once trimmed.
+2. **Corners.** Rounded corners would leave white gaps. For each corner, the tool samples colour along the diagonal towards the centre of the card and fills the corner from those samples.
+3. **Output.** The result is exported at print size, optionally with crop marks and converted to CMYK.
+
+A deterministic approach was a deliberate choice over AI in-painting: it is instant, predictable and works offline.
+
+## Privacy
+
+Card processing is 100% local once images are on your device. The app only makes network requests:
+
+- to the card databases ([Scryfall](https://scryfall.com/docs/api), [Pokémon TCG API](https://pokemontcg.io), [YGOPRODeck](https://ygoprodeck.com/api-guide/)) when you import a list; images are downloaded into the browser, never uploaded;
+- to `/api/feedback` when you send feedback (message only; the recipient address stays on the server).
+
+## Usage
+
+1. **Open…** a folder of cards (Chrome and Edge use the directory picker; other browsers fall back to a file dialog), or **Import list…** to paste a deck list
+2. Adjust border, corners, trim, size, bleed and colour mode
+3. Pan and zoom the preview: scroll, drag or `+` / `−`; double-click to reset
+4. Optionally **Choose save folder** (Chromium); otherwise files go to Downloads
+5. **Save**, **Save & next** or **Save all**
+
+## Tech stack
 
 - React + Vite
 - Client-side image pipeline (Canvas)
-- Deployable on [Vercel](https://vercel.com) (static UI + `/api/feedback`)
-- [Vercel Analytics](https://vercel.com/docs/analytics)
-- Feedback form via Gmail SMTP (Nodemailer)
+- Vercel: static hosting, serverless `/api/feedback`, Vercel Analytics
+- Nodemailer over Gmail SMTP for the feedback form
 
-## Requirements
+## Run it locally
 
-- Node.js 20+
-
-## Development
+Requires Node.js 20+.
 
 ```bash
 npm install
 npm run dev
 ```
 
-For the feedback API locally, use `vercel dev` (needs the Gmail env vars below).
+Build with `npm run build` (output in `dist/`), preview with `npm run preview`.
+For the feedback API locally, use `vercel dev` with the environment variables below.
 
-## Build
+### Environment variables (feedback form only)
 
-```bash
-npm run build
-```
+| Name | Purpose |
+|---|---|
+| `GMAIL_USER` | Gmail address used to send mail (SMTP login) |
+| `GMAIL_APP_PASSWORD` | [Google App Password](https://myaccount.google.com/apppasswords) for that account (requires 2FA) |
 
-Output goes to `dist/` (static files). Preview locally with `npm run preview`.
+Add them in Vercel under **Project → Settings → Environment Variables**. They are never shipped to the browser.
 
-## Deploy on Vercel
+## History
 
-Connect the repo and deploy. `vercel.json` rewrites SPA routes while leaving `/api/*` alone.
+The first version was a desktop app (.exe / .dmg). Asking people to install an unknown executable turned out to be a real barrier, so it was rebuilt as a web app with open source: nothing to install, and anyone can check what it does.
 
-### Environment variables
+## Roadmap
 
-| Name | Required | Purpose |
-|---|---|---|
-| `GMAIL_USER` | Yes (for feedback) | Gmail address used to send mail (SMTP login) |
-| `GMAIL_APP_PASSWORD` | Yes (for feedback) | [Google App Password](https://myaccount.google.com/apppasswords) for that account |
+- [ ] [Your next idea, e.g. PDF export with several cards per A4 sheet]
+- [ ] [e.g. support for more games]
 
-Add them under **Project → Settings → Environment Variables**.
+## Disclaimer
 
-Create the app password with 2FA enabled on the Google account. The feedback recipient stays server-side only (never shipped to the browser).
+For personal use. Card names and images belong to their respective owners; this tool does not host or distribute card images.
 
-## Usage
+## Support
 
-1. **Open…** a folder of cards (Chrome/Edge can use the directory picker; other browsers fall back to a folder file dialog)
-2. Adjust border/corners, trim, 63×88 size, bleed, RGB/CMYK
-3. Pan/zoom the preview (scroll, drag, or `+` / `−`; double-click to reset)
-4. Optionally **Choose save folder** (Chromium) — otherwise files download to your Downloads folder
-5. **Save** / **Save & next** / **Save all**
-6. Use **Feedbacks / issues report** (bottom center) to send private feedback
-7. Or **Import list…** to paste a Magic / Pokémon / Yu-Gi-Oh decklist and download art from Scryfall, Pokémon TCG API, or YGOPRODeck into the browser session
+If the tool saves you time, you can [buy me a coffee on Ko-fi](https://ko-fi.com/daemmm).
 
-## Privacy
+## License
 
-Card processing is 100% local after images are on your device. Network requests from the UI:
-
-- `/api/feedback` when the user submits the feedback form (message only; recipient address stays on the server)
-- card-database APIs (Scryfall / Pokémon TCG / YGOPRODeck) only when you import a list — images are downloaded into the browser, not uploaded to our servers
+[MIT, or the license you choose]
