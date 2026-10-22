@@ -24,7 +24,7 @@ This tool removes both steps: paste a deck list, download the images, and export
 - **Deck-list import** for Magic: The Gathering, Pokémon and Yu-Gi-Oh!, using public card databases
 - **Private feedback form** built into the app
 
-![Deck-list import](docs/importList.png)
+![Deck-list import](docs/ImportList.png)
 
 ## How it works
 
