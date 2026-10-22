@@ -76,7 +76,8 @@ const fr: Dictionary = {
   zoomIn: 'Zoom avant',
   zoomOut: 'Zoom arrière',
   zoomReset: 'Réinitialiser le zoom',
-  zoomHint: 'Molette zoom · glisser pan · double-clic reset',
+  zoomFit: 'Ajuster',
+  zoomHint: 'Pinch / molette zoom · glisser pan · double tap ajuster',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: 'Envoyer un feedback',
   feedbackIntro: 'Signalez un bug ou proposez une amélioration. Le message est privé — aucune adresse email n’est affichée.',
@@ -103,6 +104,10 @@ const fr: Dictionary = {
   importPhaseDownload: 'Téléchargement',
   importNoneFound: 'Aucune carte importée',
   importError: 'Échec de l’import',
+  hideFolder: 'Masquer le dossier',
+  showFolder: 'Afficher le dossier',
+  hideControls: 'Masquer les réglages',
+  showControls: 'Afficher les réglages',
 }
 
 export default fr

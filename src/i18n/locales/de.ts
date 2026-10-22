@@ -76,7 +76,8 @@ const de: Dictionary = {
   zoomIn: 'Vergrößern',
   zoomOut: 'Verkleinern',
   zoomReset: 'Zoom zurücksetzen',
-  zoomHint: 'Scrollen zoom · ziehen pan · Doppelklick reset',
+  zoomFit: 'Einpassen',
+  zoomHint: 'Pinch / Scrollen zoom · ziehen pan · Doppeltipp einpassen',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: 'Feedback senden',
   feedbackIntro: 'Melde einen Fehler oder schlage eine Verbesserung vor. Die Nachricht ist privat — keine E-Mail wird angezeigt.',
@@ -103,6 +104,10 @@ const de: Dictionary = {
   importPhaseDownload: 'Download',
   importNoneFound: 'Keine Karten importiert',
   importError: 'Import fehlgeschlagen',
+  hideFolder: 'Ordner ausblenden',
+  showFolder: 'Ordner einblenden',
+  hideControls: 'Einstellungen ausblenden',
+  showControls: 'Einstellungen einblenden',
 }
 
 export default de

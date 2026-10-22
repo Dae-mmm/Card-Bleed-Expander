@@ -76,7 +76,8 @@ const ru: Dictionary = {
   zoomIn: 'Увеличить',
   zoomOut: 'Уменьшить',
   zoomReset: 'Сбросить масштаб',
-  zoomHint: 'Колесо zoom · перетаскивание pan · двойной клик reset',
+  zoomFit: 'Вписать',
+  zoomHint: 'Pinch / колесо zoom · перетаскивание pan · двойной тап вписать',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: 'Отправить отзыв',
   feedbackIntro: 'Сообщите об ошибке или предложите улучшение. Сообщение приватное — адрес почты на странице не показывается.',
@@ -103,6 +104,10 @@ const ru: Dictionary = {
   importPhaseDownload: 'Загрузка',
   importNoneFound: 'Не удалось импортировать карты',
   importError: 'Ошибка импорта',
+  hideFolder: 'Скрыть папку',
+  showFolder: 'Показать папку',
+  hideControls: 'Скрыть настройки',
+  showControls: 'Показать настройки',
 }
 
 export default ru

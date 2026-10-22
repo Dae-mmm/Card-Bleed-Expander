@@ -74,7 +74,8 @@ const zh: Dictionary = {
   zoomIn: '放大',
   zoomOut: '缩小',
   zoomReset: '重置缩放',
-  zoomHint: '滚轮缩放 · 拖动平移 · 双击重置',
+  zoomFit: '适应',
+  zoomHint: '双指/滚轮缩放 · 拖动平移 · 双击适应',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: '发送反馈',
   feedbackIntro: '报告问题或提出建议。消息是私密的——页面上不会显示邮箱地址。',
@@ -101,6 +102,10 @@ const zh: Dictionary = {
   importPhaseDownload: '下载',
   importNoneFound: '未能导入任何卡牌',
   importError: '导入失败',
+  hideFolder: '隐藏文件夹',
+  showFolder: '显示文件夹',
+  hideControls: '隐藏设置',
+  showControls: '显示设置',
 }
 
 export default zh

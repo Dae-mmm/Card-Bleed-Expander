@@ -77,7 +77,8 @@ const it: Dictionary = {
   zoomIn: 'Ingrandisci',
   zoomOut: 'Riduci',
   zoomReset: 'Reimposta zoom',
-  zoomHint: 'Scroll zoom · trascina pan · doppio clic reset',
+  zoomFit: 'Adatta',
+  zoomHint: 'Pinch / scroll zoom · trascina pan · doppio tap adatta',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: 'Invia feedback',
   feedbackIntro:
@@ -107,6 +108,10 @@ const it: Dictionary = {
   importPhaseDownload: 'Download',
   importNoneFound: 'Nessuna carta importata',
   importError: 'Import fallito',
+  hideFolder: 'Nascondi cartella',
+  showFolder: 'Mostra cartella',
+  hideControls: 'Nascondi impostazioni',
+  showControls: 'Mostra impostazioni',
 }
 
 export default it

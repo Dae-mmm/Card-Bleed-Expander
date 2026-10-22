@@ -76,7 +76,8 @@ const es: Dictionary = {
   zoomIn: 'Acercar',
   zoomOut: 'Alejar',
   zoomReset: 'Restablecer zoom',
-  zoomHint: 'Scroll zoom · arrastrar pan · doble clic reset',
+  zoomFit: 'Ajustar',
+  zoomHint: 'Pinch / scroll zoom · arrastrar pan · doble toque ajustar',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: 'Enviar feedback',
   feedbackIntro: 'Reporta un error o sugiere una mejora. El mensaje es privado: no se muestra ningún email en la página.',
@@ -103,6 +104,10 @@ const es: Dictionary = {
   importPhaseDownload: 'Descargando',
   importNoneFound: 'No se pudo importar ninguna carta',
   importError: 'Error al importar',
+  hideFolder: 'Ocultar carpeta',
+  showFolder: 'Mostrar carpeta',
+  hideControls: 'Ocultar ajustes',
+  showControls: 'Mostrar ajustes',
 }
 
 export default es

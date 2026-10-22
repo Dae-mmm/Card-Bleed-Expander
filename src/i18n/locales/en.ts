@@ -77,7 +77,8 @@ const en: Dictionary = {
   zoomIn: 'Zoom in',
   zoomOut: 'Zoom out',
   zoomReset: 'Reset zoom',
-  zoomHint: 'Scroll zoom · drag pan · double-click reset',
+  zoomFit: 'To fit',
+  zoomHint: 'Pinch / scroll zoom · drag pan · double-tap fit',
   feedbackFab: 'Feedbacks / issues report',
   feedbackTitle: 'Send feedback',
   feedbackIntro: 'Report a bug or suggest an improvement. Your message is sent privately — no email address is shown on this page.',
@@ -106,6 +107,10 @@ const en: Dictionary = {
   importPhaseDownload: 'Downloading',
   importNoneFound: 'No cards could be imported',
   importError: 'Import failed',
+  hideFolder: 'Hide folder',
+  showFolder: 'Show folder',
+  hideControls: 'Hide settings',
+  showControls: 'Show settings',
 }
 
 export default en

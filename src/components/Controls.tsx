@@ -225,7 +225,7 @@ export function Controls({
   const defaultTitle = t('setDefaultFollowing')
 
   return (
-    <aside className="panel controls">
+    <aside id="controls-panel" className="panel controls">
       <header className="panel-header">
         <h2>{t('settings')}</h2>
       </header>
