@@ -5,8 +5,7 @@ const es: Dictionary = {
   settings: 'Ajustes',
   folder: 'Carpeta',
   openFolder: 'Abrir…',
-  openFolderHint:
-    'Abre una carpeta con cartas. Todo se ejecuta en el navegador: los archivos no salen de tu dispositivo.',
+  openFolderHint: 'Abre una carpeta local, o importa una lista desde Scryfall / Pokémon TCG / Yu-Gi-Oh.',
   prev: '← Ant',
   next: 'Sig →',
   statusTodo: 'pendiente',
@@ -90,6 +89,20 @@ const es: Dictionary = {
   feedbackSent: 'Gracias — feedback enviado.',
   feedbackClose: 'Cerrar',
   feedbackError: 'No se pudo enviar. Inténtalo más tarde.',
+  importList: 'Importar lista…',
+  importTitle: 'Importar lista de cartas',
+  importIntro: 'Pega un mazo/lista. Las imágenes se descargan de APIs públicas en esta sesión del navegador (no se suben a nuestro servidor). Respeta términos y copyright de cada juego para uso personal.',
+  importListLabel: 'Lista de cartas',
+  importFormatHint: 'Una carta por línea. Set + número de coleccionista opcionales: "1 Sol Ring (C21) 10". Si faltan, se usa la impresión más reciente.',
+  importGameMtg: 'Magic',
+  importGamePokemon: 'Pokémon',
+  importGameYugioh: 'Yu-Gi-Oh!',
+  importStart: 'Importar y descargar',
+  importWorking: 'Trabajando…',
+  importPhaseResolve: 'Buscando',
+  importPhaseDownload: 'Descargando',
+  importNoneFound: 'No se pudo importar ninguna carta',
+  importError: 'Error al importar',
 }
 
 export default es

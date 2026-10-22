@@ -8,6 +8,7 @@ interface FolderListProps {
   saved: Set<string>
   onSelect: (index: number) => void
   onOpenFolder: () => void
+  onImportList: () => void
 }
 
 export function FolderList({
@@ -18,6 +19,7 @@ export function FolderList({
   saved,
   onSelect,
   onOpenFolder,
+  onImportList,
 }: FolderListProps) {
   const { t } = useI18n()
 
@@ -25,9 +27,14 @@ export function FolderList({
     <aside className="panel folder-list">
       <header className="panel-header">
         <h2>{t('folder')}</h2>
-        <button type="button" className="secondary compact" onClick={onOpenFolder}>
-          {t('openFolder')}
-        </button>
+        <div className="folder-actions">
+          <button type="button" className="secondary compact" onClick={onImportList}>
+            {t('importList')}
+          </button>
+          <button type="button" className="secondary compact" onClick={onOpenFolder}>
+            {t('openFolder')}
+          </button>
+        </div>
       </header>
 
       {folderPath ? (
