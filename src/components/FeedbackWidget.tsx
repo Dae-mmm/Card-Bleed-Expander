@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { useI18n } from '../i18n'
+import { apiUrl } from '../lib/platform'
 
 type SubmitState = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -35,7 +36,7 @@ export function FeedbackWidget() {
       setStatus('sending')
       setError(null)
       try {
-        const res = await fetch('/api/feedback', {
+        const res = await fetch(apiUrl('/api/feedback'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, contact, message, website }),

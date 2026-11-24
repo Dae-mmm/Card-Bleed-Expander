@@ -1,0 +1,4 @@
+/target/
+/gen/schemas
+# Generated in CI from app-icon.png (`tauri icon`)
+/icons/

@@ -18,9 +18,28 @@ function asTrimmedString(value: unknown, max: number): string {
   return value.trim().slice(0, max)
 }
 
+/** Origins of the Tauri desktop app (Windows uses http(s)://tauri.localhost). */
+const DESKTOP_ORIGINS = new Set([
+  'http://tauri.localhost',
+  'https://tauri.localhost',
+  'tauri://localhost',
+])
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const origin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+  if (DESKTOP_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    res.setHeader('Vary', 'Origin')
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end()
+  }
+
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST')
+    res.setHeader('Allow', 'POST, OPTIONS')
     return res.status(405).json({ error: 'Method not allowed' })
   }
 

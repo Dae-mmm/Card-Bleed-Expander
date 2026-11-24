@@ -9,7 +9,9 @@
     "dev": "vite",
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "desktop:dev": "npx --yes @tauri-apps/cli@2 dev",
+    "desktop:build": "npx --yes @tauri-apps/cli@2 build"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
