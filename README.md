@@ -79,6 +79,36 @@ For the feedback API locally, use `vercel dev` with the environment variables be
 
 Add them in Vercel under **Project → Settings → Environment Variables**. They are never shipped to the browser.
 
+## Desktop app (Windows)
+
+A Windows installer is available on the [Releases](https://github.com/Dae-mmm/card-bleed-expander/releases) page. It is the same app wrapped with [Tauri](https://tauri.app), so it runs in its own window and works offline (deck-list import and feedback still need internet).
+
+The installer is not code-signed, so on first launch Windows SmartScreen may say *"Windows protected your PC"*: click **More info → Run anyway**.
+
+### Building it
+
+Releases are built by GitHub Actions (`.github/workflows/desktop-windows.yml`):
+
+- **Pull requests** that touch `src-tauri/` build the installer and attach it to the workflow run (Actions → run → *Artifacts*).
+- **Pushing a tag** like `v2.0.0` (or running the workflow manually) creates a **draft** Release with the `.exe` and `.msi`. Check it, then publish.
+
+The version comes from `package.json`, so bump it before tagging:
+
+```bash
+npm version patch   # updates package.json and creates the git tag
+git push --follow-tags
+```
+
+To build locally on Windows you need [Rust](https://rustup.rs) and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/):
+
+```bash
+npm install
+npx @tauri-apps/cli@2 icon src-tauri/app-icon.png   # once, generates src-tauri/icons
+npm run desktop:dev     # dev window with hot reload
+npm run desktop:build   # installers in src-tauri/target/release/bundle/
+```
+
+
 ## History
 
 The first version was a desktop app (.exe / .dmg). Asking people to install an unknown executable turned out to be a real barrier, so it was rebuilt as a web app with open source: nothing to install, and anyone can check what it does.

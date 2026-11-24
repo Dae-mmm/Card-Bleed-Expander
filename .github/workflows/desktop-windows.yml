@@ -1,0 +1,84 @@
+name: Desktop app (Windows)
+
+# - Pull requests touching the desktop build: build the installer and attach it
+#   to the workflow run as an artifact (for testing, nothing is published).
+# - Tag `v*` (e.g. v2.0.0) or manual run: build and create a *draft* GitHub
+#   Release with the installers attached. Review it, then click Publish.
+on:
+  pull_request:
+    paths:
+      - 'src-tauri/**'
+      - '.github/workflows/desktop-windows.yml'
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TAURI_CLI: npx --yes @tauri-apps/cli@2
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Generate app icons
+        run: ${{ env.TAURI_CLI }} icon src-tauri/app-icon.png
+
+      # --- Test build (PRs): installer as a downloadable workflow artifact ---
+      - name: Build installer
+        if: github.event_name == 'pull_request'
+        run: ${{ env.TAURI_CLI }} build
+
+      - name: Upload installer
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: card-bleed-expander-windows
+          path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+          if-no-files-found: error
+
+      # --- Release (tag or manual): draft GitHub Release with installers ---
+      - name: Build and create draft release
+        if: github.event_name != 'pull_request'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: ${{ env.TAURI_CLI }}
+          tagName: v__VERSION__
+          releaseName: Card Bleed Expander v__VERSION__
+          releaseBody: |
+            Windows desktop version of Card Bleed Expander.
+
+            **Download:** `Card Bleed Expander_x.y.z_x64-setup.exe` (recommended) or the `.msi`.
+
+            The installer is not code-signed: on first launch Windows SmartScreen may show
+            "Windows protected your PC". Click **More info → Run anyway**.
+
+            Card processing is fully offline. Deck-list import and the feedback form need an internet connection.
+          releaseDraft: true
+          prerelease: false
